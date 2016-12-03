@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 from core.models import Item, Island
 
@@ -7,10 +8,18 @@ from core.models import Item, Island
 class Profile(models.Model):
     user = models.OneToOneField(User)
     avatar = models.ImageField()
-    experience = models.IntegerField()
+    experience = models.IntegerField(default=1)
     island = models.ForeignKey(Island)
-    gcm_token = models.CharField(max_length=255)
-    auth_token = models.CharField(max_length=255)
+    gcm_token = models.CharField(max_length=255, default=None, null=True)
+
+    def _set_random_island(self):
+        pass
+
+    def _set_default_avatar(self):
+        pass
+
+    def _create_auth_token(self):
+        return Token.objects.create(self.user)
 
     def __str__(self):
         return self.user.username
