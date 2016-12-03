@@ -35,3 +35,17 @@ class ShipUpgrade(models.Model):
 
     def __str__(self):
         return self.ship_store.name + " " + self.item_required.name
+
+
+class Island(models.Model):
+    name = models.CharField(max_length=255)
+    item = models.ForeignKey(Item)
+
+    def __str__(self):
+        return self.name
+
+class PortType(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
