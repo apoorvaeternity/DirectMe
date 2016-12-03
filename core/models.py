@@ -11,3 +11,11 @@ class ShipStore(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Level(models.Model):
+    level_number = models.IntegerField()
+    experience_required = models.IntegerField()
+
+    def __str__(self):
+        return str(self.level_number)
