@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework.serializers import ModelSerializer
 
+from .models import Profile, Token
+
 
 class UserRegistrationSerializer(ModelSerializer):
     class Meta:
@@ -8,14 +10,22 @@ class UserRegistrationSerializer(ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        return User.objects.create_user(
+        user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password']
         )
 
+        profile = Profile(user=user)
+        profile.save()
 
-class UserAuthenticationSeriaizer(ModelSerializer):
+        token = Token(user=user)
+        token.save()
+
+        return user
+
+
+class UserAuthenticationSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'password')

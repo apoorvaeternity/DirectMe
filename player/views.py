@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.authtoken.models import Token
 
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSeriaizer
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer
 
 
 class UserRegistrationView(APIView):
