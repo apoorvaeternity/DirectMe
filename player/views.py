@@ -25,15 +25,12 @@ class UserRegistrationView(APIView):
 
 class UserAuthenticationView(APIView):
     def post(self, request, *args, **kwargs):
-        user = authenticate(
-            username=request.data['username'],
-            password=request.data['password']
-        )
+        serializer = UserAuthenticationSerializer(data=self.request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            return Response({'token': user.auth_token.key}, status=status.HTTP_200_OK)
 
-        if user is not None:
-            return Response({"token": Token.objects.filter(user=user).first().key})
-
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class User(APIView):
