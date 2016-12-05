@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ship.models import Port
-from ship.serializers import PortsListSerializer
+from ship.models import Port, Ship
+from ship.serializers import PortsListSerializer, ShipsListSerializer
 
 
 class PortsList(APIView):
@@ -12,15 +12,32 @@ class PortsList(APIView):
     Retrieve all ports for a user.
     """
 
-    def get_object(self, pk):
+    def get_object(self, user):
         try:
-            return Port.objects.filter(user_id=pk)
+            return Port.objects.filter(user_id=user)
         except Port.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk):
-        ports = self.get_object(pk)
+    def get(self, request, user):
+        ports = self.get_object(user)
         serializer = PortsListSerializer(ports, many=True)
+        return Response(serializer.data)
+
+
+class ShipsList(APIView):
+    """
+    Retrieves all active ships of a user.
+    """
+
+    def get_object(self, user):
+        try:
+            return Ship.objects.filter(user_id=user, is_active=True)
+        except Ship.DoesNotExist:
+            raise Http404
+
+    def get(self, request, user):
+        ships = self.get_object(user)
+        serializer = ShipsListSerializer(ships, many=True)
         return Response(serializer.data)
 
 

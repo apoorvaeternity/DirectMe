@@ -12,6 +12,9 @@ class Ship(models.Model):
     upgrade_to = models.ForeignKey("self", default=None, null=True, blank=True)
     upgraded_at = models.DateTimeField(blank=True, null=True)
 
+    def __str__(self):
+        return self.user.username + " : " + self.ship_store.name
+
 
 class PortType(models.Model):
     name = models.CharField(max_length=255)
