@@ -39,5 +39,5 @@ class ShipsDetail(APIView):
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
-        'ships': reverse('ship-list', request=request, format=format),
+        'all-ships': reverse('ship-list', request=request, format=format),
     })

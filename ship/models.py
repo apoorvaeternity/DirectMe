@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 from core.models import Slot, Item, ShipStore
 
@@ -21,11 +21,11 @@ class PortType(models.Model):
 
 
 class Port(models.Model):
-    user = models.ForeignKey(User)
-    type = models.ForeignKey(PortType)
+    user = models.ForeignKey(User, related_name='user')
+    type = models.ForeignKey(PortType, related_name='port')
 
     def __str__(self):
-        return self.user.username
+        return self.user.username + " : " + self.type.name
 
 
 class Dock(models.Model):

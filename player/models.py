@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 from core.models import Item, Island
 
@@ -22,4 +22,4 @@ class Inventory(models.Model):
     item = models.ForeignKey(Item)
 
     def __str__(self):
-        return self.item.name + str(self.count)
+        return self.user.username + " : " + self.item.name + " : " + str(self.count)
