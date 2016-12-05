@@ -9,8 +9,8 @@ class Ship(models.Model):
     user = models.ForeignKey(User)
     raid_count = models.IntegerField()
     is_active = models.BooleanField()
-    upgrade_to = models.ForeignKey("self", default=None, null=True)
-    upgraded_at = models.DateTimeField()
+    upgrade_to = models.ForeignKey("self", default=None, null=True, blank=True)
+    upgraded_at = models.DateTimeField(blank=True, null=True)
 
 
 class PortType(models.Model):
