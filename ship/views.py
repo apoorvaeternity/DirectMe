@@ -18,7 +18,8 @@ class PortsList(APIView):
         except Port.DoesNotExist:
             raise Http404
 
-    def get(self, request, user):
+    def get(self, request):
+        user = request.GET.get('user_id', 0)
         ports = self.get_object(user)
         serializer = PortsListSerializer(ports, many=True)
         return Response(serializer.data)
@@ -35,8 +36,9 @@ class ShipsList(APIView):
         except Ship.DoesNotExist:
             raise Http404
 
-    def get(self, request, user):
-        ships = self.get_object(user)
+    def get(self, request):
+        user_id = request.GET.get('user_id', 0)
+        ships = self.get_object(user_id)
         serializer = ShipsListSerializer(ships, many=True)
         return Response(serializer.data)
 
