@@ -53,3 +53,9 @@ class Slot(models.Model):
 
     def __str__(self):
         return str(self.id) + " : " + str(self.unlock_level)
+
+
+class Version(models.Model):
+    platform = models.CharField(max_length=255)
+    version = models.CharField(max_length=255)
+    is_essential = models.BooleanField(default=False)

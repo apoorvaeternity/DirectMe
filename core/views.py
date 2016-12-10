@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.models import ShipStore
-from core.serializers import ShipStoreSerializer
+from core.models import ShipStore, Version
+from core.serializers import ShipStoreSerializer, VersionSerializer
 
 
 class ShipsList(APIView):
@@ -32,4 +32,14 @@ class ShipsDetail(APIView):
     def get(self, request, ship_id):
         ship = get_object_or_404(ShipStore, pk=ship_id)
         serializer = ShipStoreSerializer(ship)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VersionCheck(APIView):
+    """
+    Version check at app startup
+    """
+
+    def get(self, request):
+        serializer = VersionSerializer(Version.objects.all(),many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
