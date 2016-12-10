@@ -109,3 +109,7 @@ class UserGcmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('gcm_token',)
+
+
+class UserPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=8)

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserProfileSerializer, \
-    UserGcmSerializer
+    UserGcmSerializer, UserPasswordSerializer
 
 
 class UserRegistrationView(APIView):
@@ -66,4 +66,18 @@ class GCMTokenView(APIView):
         if serializer.is_valid():
             serializer.update(self.request.user.profile, serializer.validated_data)
             return Response(status=status.HTTP_201_CREATED)
-        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserPasswordUpdateView(APIView):
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = UserPasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            request.user.set_password(serializer.validated_data['password'])
+            request.user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
