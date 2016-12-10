@@ -49,5 +49,8 @@ class Inventory(models.Model):
     user = models.ForeignKey(User)
     item = models.ForeignKey(Item)
 
+    class Meta:
+        verbose_name_plural = 'Inventory'
+
     def __str__(self):
         return self.user.username + " : " + self.item.name + " : " + str(self.count)
