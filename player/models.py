@@ -4,7 +4,6 @@ from rest_framework.authtoken.models import Token
 
 from django.db import models
 
-
 from core.models import Item, Island
 
 from random import randint
@@ -26,15 +25,14 @@ class Profile(models.Model):
         return super(Profile, self).save()
 
     def _set_random_island(self):
-        count = Island.objects.count()
+        count = Island.objects.exclude(name='Pirate Island').count()
         # If not Island has been added yet, raise an error
         if count == 0:
             raise NotImplementedError
 
-        random_island_id = randint(0, count)
+        random_island_id = randint(0, count - 1)
 
-        self.island = Island.objects.all()[random_island_id]
-        print(self.island)
+        self.island = Island.objects.exclude(name='Pirate Island')[random_island_id]
 
     def _set_default_avatar(self):
         pass
