@@ -9,5 +9,8 @@ urlpatterns = [
         name='ports'),
     url(r'^getShips/$',
         views.ShipsList.as_view(),
-        name='ships')
+        name='ships'),
+    url(r'^getDocks/$',
+        views.DocksList.as_view(),
+        name='docks')
 ]

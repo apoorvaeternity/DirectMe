@@ -50,3 +50,6 @@ class Island(models.Model):
 
 class Slot(models.Model):
     unlock_level = models.ForeignKey(Level)
+
+    def __str__(self):
+        return str(self.id) + " : " + str(self.unlock_level)

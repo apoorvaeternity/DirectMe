@@ -37,7 +37,8 @@ class Dock(models.Model):
     ship = models.ForeignKey(Ship)
 
     def __str__(self):
-        return self.user.username
+        return self.user.username + " : (slot_id " + str(self.slot.id) + ") : " + str(self.ship.ship_store.name) + " : " + str(
+            self.slot.unlock_level)
 
 
 class DockChart(models.Model):

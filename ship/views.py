@@ -1,10 +1,11 @@
-from django.http import Http404
+from django.shortcuts import get_list_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ship.models import Port, Ship
-from ship.serializers import PortsListSerializer, ShipsListSerializer
+from ship.models import Port, Ship, Dock
+from ship.serializers import PortsListSerializer, ShipsListSerializer, DocksListSerializer
 
 
 class PortsList(APIView):
@@ -12,17 +13,10 @@ class PortsList(APIView):
     Retrieve all ports for a user.
     """
 
-    def get_object(self, user):
-        try:
-            return Port.objects.filter(user_id=user)
-        except Port.DoesNotExist:
-            raise Http404
-
     def get(self, request):
-        user = request.GET.get('user_id', 0)
-        ports = self.get_object(user)
+        ports = get_list_or_404(Port, user_id=request.user.id)
         serializer = PortsListSerializer(ports, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ShipsList(APIView):
@@ -30,17 +24,21 @@ class ShipsList(APIView):
     Retrieves all active ships of a user.
     """
 
-    def get_object(self, user):
-        try:
-            return Ship.objects.filter(user_id=user, is_active=True)
-        except Ship.DoesNotExist:
-            raise Http404
+    def get(self, request):
+        ships = get_list_or_404(Ship, user_id=request.user.id, is_active=True)
+        serializer = ShipsListSerializer(ships, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DocksList(APIView):
+    """
+    Retrieves docks for the user.
+    """
 
     def get(self, request):
-        user_id = request.GET.get('user_id', 0)
-        ships = self.get_object(user_id)
-        serializer = ShipsListSerializer(ships, many=True)
-        return Response(serializer.data)
+        ships = get_list_or_404(Dock, user_id=request.user.id)
+        serializer = DocksListSerializer(ships, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

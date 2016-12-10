@@ -7,7 +7,7 @@ urlpatterns = [
     url(r'^getAllShips/$',
         views.ShipsList.as_view(),
         name='ship-list'),
-    url(r'^getShipDetails/(?P<pk>[0-9]+)/$',
+    url(r'^getShipDetails/$',
         views.ShipsDetail.as_view(),
         name='ship-detail'),
 ]
