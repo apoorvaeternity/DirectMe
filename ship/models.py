@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 from core.models import Slot, Item, ShipStore
 
@@ -9,8 +9,11 @@ class Ship(models.Model):
     user = models.ForeignKey(User)
     raid_count = models.IntegerField()
     is_active = models.BooleanField()
-    upgrade_to = models.ForeignKey("self", default=None, null=True)
-    upgraded_at = models.DateTimeField()
+    upgrade_to = models.ForeignKey("self", default=None, null=True, blank=True)
+    upgraded_at = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username + " : " + self.ship_store.name
 
 
 class PortType(models.Model):
@@ -21,11 +24,11 @@ class PortType(models.Model):
 
 
 class Port(models.Model):
-    user = models.ForeignKey(User)
-    type = models.ForeignKey(PortType)
+    user = models.ForeignKey(User, related_name='user')
+    type = models.ForeignKey(PortType, related_name='port')
 
     def __str__(self):
-        return self.user.username
+        return self.user.username + " : " + self.type.name
 
 
 class Dock(models.Model):
@@ -34,7 +37,9 @@ class Dock(models.Model):
     ship = models.ForeignKey(Ship)
 
     def __str__(self):
-        return self.user.username
+        return self.user.username + " : (slot_id " + str(self.slot.id) + ") : " + str(
+            self.ship.ship_store.name) + " : " + str(
+            self.slot.unlock_level)
 
 
 class DockChart(models.Model):

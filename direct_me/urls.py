@@ -19,4 +19,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user/', include('player.urls')),
+    url(r'^store/', include('core.urls')),
+    url(r'^ship/', include('ship.urls')),
+
 ]

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Profile, Inventory
 
-admin.site.register(Profile)
+from .models import Inventory, Profile
+
 admin.site.register(Inventory)
+admin.site.register(Profile)

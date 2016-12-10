@@ -29,12 +29,15 @@ class Item(models.Model):
 
 
 class ShipUpgrade(models.Model):
-    ship_store = models.ForeignKey(ShipStore)
+    ship_store = models.ForeignKey(ShipStore, related_name='items_required', on_delete=models.CASCADE)
     count = models.IntegerField()
-    item_required = models.OneToOneField(Item)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.ship_store.name + " " + self.item_required.name
+        return self.ship_store.name + " : " + str(self.count) + " " + self.item_id.name
+
+    class Meta:
+        unique_together = ('ship_store', 'item_id')
 
 
 class Island(models.Model):
@@ -47,3 +50,6 @@ class Island(models.Model):
 
 class Slot(models.Model):
     unlock_level = models.ForeignKey(Level)
+
+    def __str__(self):
+        return str(self.id) + " : " + str(self.unlock_level)
