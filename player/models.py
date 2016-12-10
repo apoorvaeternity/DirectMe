@@ -12,7 +12,7 @@ from random import randint
 class Profile(models.Model):
     user = models.OneToOneField(User)
     avatar = models.ImageField(default=None, null=True)
-    experience = models.IntegerField(default=1)
+    experience = models.IntegerField(default=10)
     island = models.ForeignKey(Island, default=None, null=True)
     gcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
 

@@ -7,8 +7,8 @@ from core.models import Slot, Item, ShipStore
 class Ship(models.Model):
     ship_store = models.ForeignKey(ShipStore)
     user = models.ForeignKey(User)
-    raid_count = models.IntegerField()
-    is_active = models.BooleanField()
+    raid_count = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
     upgrade_to = models.ForeignKey("self", default=None, null=True, blank=True)
     upgraded_at = models.DateTimeField(blank=True, null=True)
 
@@ -23,6 +23,7 @@ class PortType(models.Model):
         return self.name
 
 
+# Parking
 class Port(models.Model):
     user = models.ForeignKey(User, related_name='user')
     type = models.ForeignKey(PortType, related_name='port')
@@ -31,15 +32,11 @@ class Port(models.Model):
         return self.user.username + " : " + self.type.name
 
 
+# Garage
 class Dock(models.Model):
     user = models.ForeignKey(User)
     slot = models.ForeignKey(Slot)
-    ship = models.ForeignKey(Ship)
-
-    def __str__(self):
-        return self.user.username + " : (slot_id " + str(self.slot.id) + ") : " + str(
-            self.ship.ship_store.name) + " : " + str(
-            self.slot.unlock_level)
+    ship = models.ForeignKey(Ship, default=None, null=True)
 
 
 class DockChart(models.Model):

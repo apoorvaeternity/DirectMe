@@ -2,7 +2,9 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Profile, Token
+from .models import Profile, Token, Inventory
+from core.models import Item, Slot, ShipStore
+from ship.models import Port, PortType, Dock, Ship
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -26,11 +28,51 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
 
+        # Initialize user data
+
+        # Create profile
         profile = Profile(user=user)
         profile.save()
 
+        # Create auth token
         token = Token(user=user)
         token.save()
+
+        # Add inventory
+        items = Item.objects.all()
+        for item in items:
+            inventory = Inventory(user=user, item=item, count=10)
+            inventory.save()
+
+        # Add ports(parking)
+        for _ in range(2):
+            port_type = PortType.objects.filter(name='Parking').first()
+            parking_port = Port(user=user, type=port_type)
+            parking_port.save()
+
+        for _ in range(3):
+            port_type = PortType.objects.filter(name='Non Parking').first()
+            non_parking_port = Port(user=user, type=port_type)
+            non_parking_port.save()
+
+        # Adds docks(garage)
+        for slot in Slot.objects.all():
+            dock = Dock(user=user, slot=slot)
+            dock.save()
+
+        # Least Costly raft_from_store
+        raft_from_store = ShipStore.objects.all().order_by('buy_cost').first()
+
+        # Create ship for user
+        raft = Ship(ship_store=raft_from_store, user=user)
+        raft.save()
+
+        # Dock requiring least level/experience
+        dock = Dock.objects.filter(user=user).order_by('slot__unlock_level').first()
+
+        # Give default raft to user
+        dock.ship = raft
+        dock.save()
 
         return user
 
