@@ -5,6 +5,13 @@ from rest_framework import serializers
 from .models import Profile, Token
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    experience = serializers.ReadOnlyField(source='profile.experience', read_only=True)
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'experience')
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

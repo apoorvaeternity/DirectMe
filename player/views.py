@@ -1,13 +1,10 @@
-from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from rest_framework.authtoken.models import Token
-
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserProfileSerializer
 
 
 class UserRegistrationView(APIView):
@@ -34,9 +31,9 @@ class UserAuthenticationView(APIView):
 
 
 class User(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication, TokenAuthentication)
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        serializer = UserRegistrationSerializer(request.user)
+        serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
