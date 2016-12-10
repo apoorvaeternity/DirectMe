@@ -21,6 +21,10 @@ class UserRegistrationView(APIView):
 
 
 class UserAuthenticationView(APIView):
+    """
+    User login
+    """
+
     def post(self, request, *args, **kwargs):
         serializer = UserAuthenticationSerializer(data=self.request.data)
         if serializer.is_valid():
@@ -31,9 +35,19 @@ class UserAuthenticationView(APIView):
 
 
 class User(APIView):
+    """
+    User Details
+    """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.update(self.request.user, serializer.validated_data)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
