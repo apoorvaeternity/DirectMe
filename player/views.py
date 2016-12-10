@@ -62,8 +62,8 @@ class GCMTokenView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        serializer = UserGcmSerializer(request.data)
+        serializer = UserGcmSerializer(request.user.profile, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            serializer.update(self.request.user.profile, serializer.validated_data)
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
