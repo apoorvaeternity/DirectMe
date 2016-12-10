@@ -1,10 +1,11 @@
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserProfileSerializer
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserProfileSerializer, \
+    UserGcmSerializer
 
 
 class UserRegistrationView(APIView):
@@ -51,3 +52,18 @@ class User(APIView):
             serializer.update(self.request.user, serializer.validated_data)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GCMTokenView(APIView):
+    """
+    Register and update gcm token
+    """
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = UserGcmSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)

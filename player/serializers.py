@@ -2,9 +2,9 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Profile, Token, Inventory
 from core.models import Item, Slot, ShipStore
 from ship.models import Port, PortType, Dock, Ship
+from .models import Profile, Token, Inventory
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -103,3 +103,9 @@ class UserAuthenticationSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class UserGcmSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('gcm_token',)
