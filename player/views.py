@@ -35,7 +35,7 @@ class UserAuthenticationView(APIView):
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
-class User(APIView):
+class UserView(APIView):
     """
     User Details
     """

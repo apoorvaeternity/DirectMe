@@ -3,8 +3,8 @@ from django.conf.urls import url
 from ship import views
 
 urlpatterns = [
-    url(r'^ports/$', views.PortsList.as_view(), name='ports'),
-    url(r'^ships/$', views.ShipsList.as_view(), name='ships'),
-    url(r'^docks/$', views.DocksList.as_view(), name='docks'),
-    url(r'^dock/$', views.DockShip.as_view())
+    url(r'^ports/$', views.PortsListView.as_view(), name='ports'),
+    url(r'^ships/$', views.ShipsListView.as_view(), name='ships'),
+    url(r'^docks/$', views.DocksListView.as_view(), name='docks'),
+    url(r'^dock/$', views.DockShipView.as_view(), name='dock-ship')
 ]

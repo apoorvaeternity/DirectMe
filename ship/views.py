@@ -11,9 +11,9 @@ from ship.models import Port, Ship, Dock, DockChart
 from ship.serializers import PortsListSerializer, ShipsListSerializer, DocksListSerializer, DockShipSerializer
 
 
-class PortsList(APIView):
+class PortsListView(APIView):
     """
-    Retrieve all ports for a user.
+    Retrieve all ports for a user and show if any ship is docked on them or not.
     """
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
@@ -25,7 +25,7 @@ class PortsList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ShipsList(APIView):
+class ShipsListView(APIView):
     """
     Retrieves all active ships of a user.
     """
@@ -39,7 +39,7 @@ class ShipsList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class DocksList(APIView):
+class DocksListView(APIView):
     """
     Retrieves docks for the user.
     """
@@ -53,7 +53,7 @@ class DocksList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class DockShip(APIView):
+class DockShipView(APIView):
     """
     Park Ship on someone else's port
     """
