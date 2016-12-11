@@ -25,3 +25,9 @@ class DocksListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dock
         fields = ('__all__')
+
+
+class DockShipSerializer(serializers.Serializer):
+    ship_id = serializers.IntegerField()
+    port_owner_id = serializers.IntegerField()
+    port_type = serializers.CharField()

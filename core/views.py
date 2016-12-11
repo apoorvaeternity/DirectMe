@@ -41,5 +41,5 @@ class VersionCheck(APIView):
     """
 
     def get(self, request):
-        serializer = VersionSerializer(Version.objects.all(),many=True)
+        serializer = VersionSerializer(Version.objects.all(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

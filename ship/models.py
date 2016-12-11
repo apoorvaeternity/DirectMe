@@ -12,6 +12,18 @@ class Ship(models.Model):
     upgrade_to = models.ForeignKey("self", default=None, null=True, blank=True)
     upgraded_at = models.DateTimeField(blank=True, null=True)
 
+    def belongs_to(self, user):
+        if self.user == user:
+            return True
+        return False
+
+    def is_idle(self):
+        if DockChart.objects.filter(ship=self, end_time=None).count() == 0:
+            return True
+        return False
+
+
+
     def __str__(self):
         return self.user.username + " : " + self.ship_store.name
 
@@ -41,8 +53,8 @@ class Dock(models.Model):
 
 class DockChart(models.Model):
     start_time = models.DateTimeField(auto_now=True)
-    end_time = models.DateTimeField()
-    is_success = models.BooleanField()
+    end_time = models.DateTimeField(default=None, null=True)
+    is_success = models.BooleanField(default=False)
     ship = models.ForeignKey(Ship)
     port = models.ForeignKey(Port)
 
