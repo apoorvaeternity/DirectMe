@@ -57,6 +57,9 @@ class DockChart(models.Model):
     ship = models.ForeignKey(Ship, related_name='ships')
     port = models.ForeignKey(Port, related_name='ports')
 
+    def __str__(self):
+        return self.ship.ship_store.name + " : " + str(self.start_time)
+
 
 class FineLog(models.Model):
     amount = models.IntegerField()

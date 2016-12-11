@@ -21,7 +21,7 @@ class PortsList(APIView):
 
     def get(self, request):
         ports = get_list_or_404(Port, user_id=request.user.id)
-        serializer = PortsListSerializer(ports, context={'request': self.request} , many=True)
+        serializer = PortsListSerializer(ports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

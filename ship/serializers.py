@@ -6,17 +6,21 @@ from ship.models import Port, Ship, Dock, DockChart
 class DockChartSerializer(serializers.ModelSerializer):
     class Meta:
         model = DockChart
-        fields = '__all__'
+        fields = ('ship', 'start_time', 'end_time', 'is_success')
 
 
 class PortsListSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(source='type.name')
-    log = DockChartSerializer(read_only=True)
+    logs = serializers.SerializerMethodField('get_logs_for_port')
+
+    def get_logs_for_port(self, obj):
+        docks = DockChart.objects.filter(end_time=None, port=obj)
+        serializer = DockChartSerializer(docks, many=True)
+        return serializer.data
 
     class Meta:
         model = Port
-        depth = 1
-        fields = ('id', 'type', 'log')
+        fields = ('id', 'type', 'logs')
 
 
 class ShipsListSerializer(serializers.ModelSerializer):
