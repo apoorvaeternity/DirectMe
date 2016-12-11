@@ -22,6 +22,7 @@ class SlotModelAdmin(admin.ModelAdmin):
 class VersionModelAdmin(admin.ModelAdmin):
     list_display = ('platform', 'version', 'is_essential')
 
+
 admin.site.register(ShipStore, ShipStoreModelAdmin)
 admin.site.register(Level, LevelModelAdmin)
 admin.site.register(ShipUpgrade, ShipUpgardeModelAdmin)

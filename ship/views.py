@@ -11,6 +11,38 @@ from ship.models import Port, Ship, Dock, DockChart
 from ship.serializers import PortsListSerializer, ShipsListSerializer, DocksListSerializer, DockShipSerializer
 
 
+class FineView(APIView):
+    """
+    Fine a ship on your non-parking port
+    """
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, port_id):
+        port = Port.objects.get(pk=port_id)
+        if port.type.name == "Parking":
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        dock_chart_instance = DockChart.objects.filter(port=port, end_time=None).first()
+
+        # No ship standing on this
+        if dock_chart_instance is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # End the parking
+        dock_chart_instance.end_time = timezone.now()
+        dock_chart_instance.is_success = False
+        dock_chart_instance.save()
+
+        self.request.user.profile.experience += 20
+
+        # TODO: Check for non negative exp
+        dock_chart_instance.ship.user.profile.experience -= 20
+
+        self.request.user.profile.save()
+        dock_chart_instance.ship.user.profile.save()
+        return Response(status=status.HTTP_200_OK)
+
+
 class PortsListView(APIView):
     """
     Retrieve all ports for a user and show if any ship is docked on them or not.
