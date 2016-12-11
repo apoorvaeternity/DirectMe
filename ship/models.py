@@ -22,8 +22,6 @@ class Ship(models.Model):
             return True
         return False
 
-
-
     def __str__(self):
         return self.user.username + " : " + self.ship_store.name
 
@@ -39,6 +37,7 @@ class PortType(models.Model):
 class Port(models.Model):
     user = models.ForeignKey(User, related_name='user')
     type = models.ForeignKey(PortType, related_name='port')
+    log = models.ForeignKey('DockChart', default=None, null=True, related_name='log')
 
     def __str__(self):
         return self.user.username + " : " + self.type.name
@@ -55,8 +54,8 @@ class DockChart(models.Model):
     start_time = models.DateTimeField(auto_now=True)
     end_time = models.DateTimeField(default=None, null=True)
     is_success = models.BooleanField(default=False)
-    ship = models.ForeignKey(Ship)
-    port = models.ForeignKey(Port)
+    ship = models.ForeignKey(Ship, related_name='ships')
+    port = models.ForeignKey(Port, related_name='ports')
 
 
 class FineLog(models.Model):

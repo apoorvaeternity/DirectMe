@@ -21,7 +21,7 @@ class PortsList(APIView):
 
     def get(self, request):
         ports = get_list_or_404(Port, user_id=request.user.id)
-        serializer = PortsListSerializer(ports, many=True)
+        serializer = PortsListSerializer(ports, context={'request': self.request} , many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -81,6 +81,8 @@ class DockShip(APIView):
             if logs.count() == 0:
                 log = DockChart(start_time=timezone.now(), ship=ship, port=port)
                 log.save()
+                port.log = log
+                port.save()
                 return Response(status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
