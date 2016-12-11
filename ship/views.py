@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from player.models import Inventory
 from ship.models import Port, Ship, Dock, DockChart
 from ship.serializers import PortsListSerializer, ShipsListSerializer, DocksListSerializer, DockShipSerializer
 
@@ -87,7 +88,7 @@ class DocksListView(APIView):
 
 class DockShipView(APIView):
     """
-    Park Ship on someone else's port
+    Dock Ship on someone else's port
     """
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
@@ -118,3 +119,43 @@ class DockShipView(APIView):
                 return Response(status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UndockShipView(APIView):
+    """
+    Undock Ship from someone else's port
+    """
+
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, ship_id):
+        ship_instance = Ship.objects.filter(pk=ship_id, user=request.user, is_active=True).first()
+
+        if ship_instance is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        dock_chart_instance = DockChart.objects.filter(ship=ship_instance, end_time=None).first()
+        if dock_chart_instance is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        dock_chart_instance.end_time = timezone.now()
+        dock_chart_instance.is_success = True
+        dock_chart_instance.save()
+
+        island = dock_chart_instance.port.user.profile.island
+        item_instance = Inventory.objects.get(user=request.user, item=island.item)
+
+        # TODO: Change item generation formula
+        time_fraction = timezone.now() - dock_chart_instance.start_time
+        minutes = time_fraction.total_seconds() / 60
+        value = int(minutes) * dock_chart_instance.ship.ship_store.cost_multiplier
+        item_instance.count += value
+
+        item_instance.save()
+
+        # TODO: Change exp gain formula
+        request.user.profile.experience += 50
+        request.user.profile.save()
+
+        return Response(status=status.HTTP_200_OK)
