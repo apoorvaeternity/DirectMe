@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'player',
     'core',
     'ship',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE_CLASSES = [

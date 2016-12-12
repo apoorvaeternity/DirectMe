@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^user/', include('player.urls')),
     url(r'^store/', include('core.urls')),
     url(r'^ship/', include('ship.urls')),
+    url(r'^$', include('rest_framework_docs.urls')),
 
 ]
