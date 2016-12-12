@@ -10,11 +10,13 @@ from player.serializers import UserRegistrationSerializer, UserAuthenticationSer
 
 class UserRegistrationView(APIView):
     """
-    User Registration Endpoint
+    Register a new user
     """
 
+    serializer_class = UserRegistrationSerializer
+
     def post(self, *args, **kwargs):
-        serializer = UserRegistrationSerializer(data=self.request.data)
+        serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
@@ -23,11 +25,12 @@ class UserRegistrationView(APIView):
 
 class UserAuthenticationView(APIView):
     """
-    User login
+    Retrieve auth token for a user
     """
+    serializer_class = UserAuthenticationSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = UserAuthenticationSerializer(data=self.request.data)
+        serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             return Response({'token': user.auth_token.key}, status=status.HTTP_200_OK)
@@ -37,17 +40,19 @@ class UserAuthenticationView(APIView):
 
 class UserView(APIView):
     """
-    User Details
+    Get all user details
     """
+
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = UserProfileSerializer
 
     def get(self, request, *args, **kwargs):
-        serializer = UserProfileSerializer(request.user)
+        serializer = self.serializer_class(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request):
-        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        serializer = self.serializer_class(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(self.request.user, serializer.validated_data)
             return Response(serializer.data)
@@ -60,9 +65,10 @@ class GCMTokenView(APIView):
     """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = UserGcmSerializer
 
     def post(self, request):
-        serializer = UserGcmSerializer(request.user.profile, data=request.data, partial=True)
+        serializer = self.serializer_class(request.user.profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(self.request.user.profile, serializer.validated_data)
             return Response(status=status.HTTP_201_CREATED)
@@ -70,11 +76,15 @@ class GCMTokenView(APIView):
 
 
 class UserPasswordUpdateView(APIView):
+    """
+    Update user's password
+    """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = UserPasswordSerializer
 
     def post(self, request):
-        serializer = UserPasswordSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             request.user.set_password(serializer.validated_data['password'])
