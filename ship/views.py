@@ -93,10 +93,11 @@ class DockShipView(APIView):
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = DockShipSerializer
 
     def post(self, request):
 
-        serializer = DockShipSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
