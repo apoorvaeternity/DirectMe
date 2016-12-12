@@ -15,10 +15,11 @@ class ShipsList(APIView):
     """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = ShipStoreSerializer
 
     def get(self, request):
         ships = ShipStore.objects.all()
-        serializer = ShipStoreSerializer(ships, many=True)
+        serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -28,10 +29,11 @@ class ShipsDetail(APIView):
     """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = ShipStoreSerializer
 
     def get(self, request, ship_id):
         ship = get_object_or_404(ShipStore, pk=ship_id)
-        serializer = ShipStoreSerializer(ship)
+        serializer = self.serializer_class(ship)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -40,6 +42,8 @@ class VersionCheck(APIView):
     Version check at app startup
     """
 
+    serializer_class = VersionSerializer
+
     def get(self, request):
-        serializer = VersionSerializer(Version.objects.all(), many=True)
+        serializer = self.serializer_class(Version.objects.all(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
