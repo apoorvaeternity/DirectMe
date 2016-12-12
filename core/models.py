@@ -43,6 +43,8 @@ class ShipUpgrade(models.Model):
 class Island(models.Model):
     name = models.CharField(max_length=255)
     item = models.ForeignKey(Item)
+    # Habitable tells wether the island can be assigned to a user
+    habitable = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
