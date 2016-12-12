@@ -21,6 +21,7 @@ class FineView(APIView):
 
     def get(self, request, port_id):
         port = Port.objects.get(pk=port_id)
+        # TODO: Remove hardcoding
         if port.type.name == "Parking":
             return Response(status=status.HTTP_400_BAD_REQUEST)
         dock_chart_instance = DockChart.objects.filter(port=port, end_time=None).first()

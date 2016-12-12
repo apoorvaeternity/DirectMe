@@ -25,6 +25,7 @@ class Profile(models.Model):
         return super(Profile, self).save()
 
     def _set_random_island(self):
+        # TODO: Remove this hardcoding
         count = Island.objects.exclude(name='Pirate Island').count()
         # If not Island has been added yet, raise an error
         if count == 0:

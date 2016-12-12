@@ -49,11 +49,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         # Add ports(parking)
         for _ in range(2):
+            # TODO: Remove hardcoding
             port_type = PortType.objects.filter(name='Parking').first()
             parking_port = Port(user=user, type=port_type)
             parking_port.save()
 
         for _ in range(3):
+            # TODO: Remove hardcoding
             port_type = PortType.objects.filter(name='Non Parking').first()
             non_parking_port = Port(user=user, type=port_type)
             non_parking_port.save()
