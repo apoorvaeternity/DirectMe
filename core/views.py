@@ -63,7 +63,6 @@ class DockShipView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class FineView(APIView):
     """
     Fine a ship on your non-parking port
@@ -94,7 +93,6 @@ class FineView(APIView):
         self.request.user.profile.save()
         dock_chart_instance.ship.user.profile.save()
         return Response(status=status.HTTP_200_OK)
-
 
 
 class PortsListView(APIView):

@@ -1,21 +1,15 @@
-from django.contrib.auth.models import User
-
-from rest_framework.authtoken.models import Token
-
-from django.db import models
-
-from core.models import Item, Island, Port, Dock
-
 from random import randint
 
-# from player.managers import ProfileModelManager
-
-
+from django.contrib.auth.models import User
 from django.contrib.auth.models import User
 from django.db import models
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 
+from core.models import Item, Island, Port, Dock
 from core.models import Item, ShipStore
+
+
 # from player.models import Profile, Inventory
 # from ship.models import Port, Dock
 
@@ -32,9 +26,7 @@ class ProfileModelManager(models.Manager):
 
         Token.objects.create(user=user)
 
-        items = Item.objects.all()
-        for item in items:
-            Inventory.objects.create(user=user, item=item, count=10)
+        Inventory.objects.create_initial_inventory(user=user)
 
         Port.objects.create_initial_ports(user=user)
 
@@ -83,10 +75,18 @@ class Profile(models.Model):
         return self.user.username
 
 
+class InventoryModelManager(models.Manager):
+    def create_initial_inventory(self, user):
+        for item in Item.objects.all():
+            Inventory.objects.create(user=user, item=item, count=10)
+
+
 class Inventory(models.Model):
     count = models.IntegerField()
     user = models.ForeignKey(User)
     item = models.ForeignKey(Item)
+
+    objects = InventoryModelManager()
 
     class Meta:
         verbose_name_plural = 'Inventory'
