@@ -4,10 +4,16 @@ from django.db import models
 
 class DockModelManager(models.Manager):
     def create_initial_docks(self, user):
+        """
+        Setup initial docs for a new user
+        """
         for slot in Slot.objects.all():
             Dock.objects.create(user=user, slot=slot)
 
     def unlock_first_dock(self, user):
+        """
+        Returns first unlocked dock
+        """
         return Dock.objects.filter(user=user).order_by('slot__unlock_level').first()
 
 
@@ -88,6 +94,9 @@ class PortModelManager(models.Manager):
         return Port.objects.create(user=user, type=PortType.objects.get_non_parking_port())
 
     def create_initial_ports(self, user):
+        """
+        Creates parking and non parking ports of a user
+        """
         for _ in range(2):
             self._create_parking_port(user=user)
 
@@ -137,6 +146,9 @@ class Ship(models.Model):
 
 class ShipStoreModelManager(models.Manager):
     def allocate_initial_ship(self, user):
+        """
+        Assigns initial raft to the user
+        """
         raft = ShipStore.objects.order_by('buy_cost').first()
         ship = Ship.objects.create(ship_store=raft, user=user)
         dock = Dock.objects.unlock_first_dock(user=user)
