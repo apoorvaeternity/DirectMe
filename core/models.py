@@ -26,12 +26,28 @@ class Dock(models.Model):
     objects = DockModelManager()
 
 
+class DockChartModelManager(models.Manager):
+    def create_entry(self, ship_id, port_owner_id, port_type):
+        free_port = Port.objects.get_empty_port(
+            user=User.objects.get(pk=port_owner_id),
+            type=PortType.objects.get(name=port_type)
+        )
+
+        return DockChart.objects.create(
+            ship=Ship.objects.get(pk=ship_id),
+            port=free_port
+
+        )
+
+
 class DockChart(models.Model):
     start_time = models.DateTimeField(auto_now=True)
     end_time = models.DateTimeField(default=None, null=True)
     is_success = models.BooleanField(default=False)
     ship = models.ForeignKey('Ship', related_name='ships')
     port = models.ForeignKey('Port', related_name='ports')
+
+    objects = DockChartModelManager()
 
     def __str__(self):
         return self.ship.ship_store.name + " : " + str(self.start_time)
@@ -102,6 +118,9 @@ class PortModelManager(models.Manager):
 
         for _ in range(3):
             self._create_non_parking_port(user=user)
+
+    def get_empty_port(self, user, type):
+        return Port.objects.filter(user=user, type=type, log=None).first()
 
 
 # Parking

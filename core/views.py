@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils import timezone
 from rest_framework import status
@@ -37,30 +36,11 @@ class DockShipView(APIView):
     serializer_class = DockShipSerializer
 
     def post(self, request):
-
-        serializer = self.serializer_class(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        ship_id = serializer.validated_data['ship_id']
-        port_owner_id = serializer.validated_data['port_owner_id']
-        port_type = serializer.validated_data['port_type']
-        ship = Ship.objects.get(pk=ship_id)
-
-        if not (ship.is_idle() and ship.is_active and ship.belongs_to(user=request.user)):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        ports = Port.objects.filter(user=User.objects.get(pk=port_owner_id), type__name=port_type)
-        for port in ports:
-            logs = DockChart.objects.filter(port=port, end_time=None)
-            if logs.count() == 0:
-                log = DockChart(start_time=timezone.now(), ship=ship, port=port)
-                log.save()
-                port.log = log
-                port.save()
-                return Response(status=status.HTTP_200_OK)
-
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid(request):
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FineView(APIView):
