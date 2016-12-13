@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'rest_framework_docs',
     'player',
     'core',
-    'ship',
     'rest_framework_swagger',
 ]
 

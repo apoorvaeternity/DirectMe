@@ -1,6 +1,48 @@
 from rest_framework import serializers
 
-from core.models import ShipStore, ShipUpgrade, Version
+from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship
+
+
+class DockChartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DockChart
+        fields = ('ship', 'start_time', 'end_time', 'is_success')
+
+
+class DocksListSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='ship_store.name')
+
+    class Meta:
+        model = Dock
+        fields = ('__all__')
+
+
+class DockShipSerializer(serializers.Serializer):
+    ship_id = serializers.IntegerField()
+    port_owner_id = serializers.IntegerField()
+    port_type = serializers.CharField()
+
+
+class PortsListSerializer(serializers.ModelSerializer):
+    type = serializers.ReadOnlyField(source='type.name')
+    logs = serializers.SerializerMethodField('get_logs_for_port')
+
+    def get_logs_for_port(self, obj):
+        docks = DockChart.objects.filter(end_time=None, port=obj)
+        serializer = DockChartSerializer(docks, many=True)
+        return serializer.data
+
+    class Meta:
+        model = Port
+        fields = ('id', 'type', 'logs')
+
+
+class ShipsListSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='ship_store.name')
+
+    class Meta:
+        model = Ship
+        fields = ('id', 'name', 'raid_count')
 
 
 class ShipUpgradeDetailSerializer(serializers.ModelSerializer):
@@ -20,7 +62,6 @@ class ShipStoreSerializer(serializers.ModelSerializer):
 
 
 class VersionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Version
         fields = '__all__'
