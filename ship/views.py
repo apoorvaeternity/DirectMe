@@ -7,8 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.models import Port, DockChart, Ship
 from player.models import Inventory
-from ship.models import Port, Ship, Dock, DockChart
+# from ship.models import Port, Ship, Dock, DockChart
 from ship.serializers import PortsListSerializer, ShipsListSerializer, DocksListSerializer, DockShipSerializer
 
 

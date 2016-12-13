@@ -4,9 +4,45 @@ from rest_framework.authtoken.models import Token
 
 from django.db import models
 
-from core.models import Item, Island
+from core.models import Item, Island, Port, Dock
 
 from random import randint
+
+# from player.managers import ProfileModelManager
+
+
+from django.contrib.auth.models import User
+from django.db import models
+from rest_framework.authtoken.models import Token
+
+from core.models import Item, ShipStore
+# from player.models import Profile, Inventory
+# from ship.models import Port, Dock
+
+
+class ProfileModelManager(models.Manager):
+    def create_player(self, username, password, email):
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=email
+        )
+
+        Profile.objects.create(user=user)
+
+        Token.objects.create(user=user)
+
+        items = Item.objects.all()
+        for item in items:
+            Inventory.objects.create(user=user, item=item, count=10)
+
+        Port.objects.create_initial_ports(user=user)
+
+        Dock.objects.create_initial_docks(user=user)
+
+        ShipStore.objects.allocate_initial_ship(user=user)
+
+        return user
 
 
 class Profile(models.Model):
@@ -15,6 +51,8 @@ class Profile(models.Model):
     experience = models.IntegerField(default=10)
     island = models.ForeignKey(Island, default=None, null=True)
     gcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
+
+    objects = ProfileModelManager()
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

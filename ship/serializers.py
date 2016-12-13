@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ship.models import Port, Ship, Dock, DockChart
+from core.models import DockChart, Port, Ship, Dock
 
 
 class DockChartSerializer(serializers.ModelSerializer):
