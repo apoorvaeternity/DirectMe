@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import ShipStore, Level, ShipUpgrade, Item, Island, Slot, Version
+from .models import ShipStore, Level, ShipUpgrade, Item, Island, Slot, Version, Ship, Port, Dock, DockChart, FineLog, \
+    RevenueLog, PortType
 
 
 class ShipStoreModelAdmin(admin.ModelAdmin):
@@ -30,8 +31,6 @@ admin.site.register(Item)
 admin.site.register(Island)
 admin.site.register(Slot, SlotModelAdmin)
 admin.site.register(Version, VersionModelAdmin)
-
-from .models import Ship, Port, Dock, DockChart, FineLog, RevenueLog, PortType
 
 
 class DockChartModelAdmin(admin.ModelAdmin):

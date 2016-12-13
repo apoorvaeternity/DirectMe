@@ -1,0 +1,169 @@
+[
+  {
+    "model": "core.island",
+    "pk": 1,
+    "fields": {
+      "name": "Coconut Island",
+      "item": 1,
+      "habitable": true
+    }
+  },
+  {
+    "model": "core.island",
+    "pk": 2,
+    "fields": {
+      "name": "Timber Island",
+      "item": 2,
+      "habitable": true
+    }
+  },
+  {
+    "model": "core.island",
+    "pk": 3,
+    "fields": {
+      "name": "Banana Island",
+      "item": 3,
+      "habitable": true
+    }
+  },
+  {
+    "model": "core.island",
+    "pk": 4,
+    "fields": {
+      "name": "Bamboo Island",
+      "item": 4,
+      "habitable": true
+    }
+  },
+  {
+    "model": "core.island",
+    "pk": 5,
+    "fields": {
+      "name": "Pirate Island",
+      "item": 5,
+      "habitable": false
+    }
+  },
+  {
+    "model": "core.item",
+    "pk": 1,
+    "fields": {
+      "name": "Coconut"
+    }
+  },
+  {
+    "model": "core.item",
+    "pk": 2,
+    "fields": {
+      "name": "Timber"
+    }
+  },
+  {
+    "model": "core.item",
+    "pk": 3,
+    "fields": {
+      "name": "Banana"
+    }
+  },
+  {
+    "model": "core.item",
+    "pk": 4,
+    "fields": {
+      "name": "Bamboo"
+    }
+  },
+  {
+    "model": "core.item",
+    "pk": 5,
+    "fields": {
+      "name": "Gold"
+    }
+  },
+  {
+    "model": "core.level",
+    "pk": 1,
+    "fields": {
+      "level_number": 1,
+      "experience_required": 10
+    }
+  },
+  {
+    "model": "core.level",
+    "pk": 2,
+    "fields": {
+      "level_number": 2,
+      "experience_required": 100
+    }
+  },
+  {
+    "model": "core.level",
+    "pk": 3,
+    "fields": {
+      "level_number": 3,
+      "experience_required": 250
+    }
+  },
+  {
+    "model": "core.porttype",
+    "pk": 1,
+    "fields": {
+      "name": "Parking",
+      "penalizable": false,
+      "ownable": true
+    }
+  },
+  {
+    "model": "core.porttype",
+    "pk": 2,
+    "fields": {
+      "name": "Non Parking",
+      "penalizable": true,
+      "ownable": true
+    }
+  },
+  {
+    "model": "core.porttype",
+    "pk": 3,
+    "fields": {
+      "name": "Public",
+      "penalizable": true,
+      "ownable": false
+    }
+  },
+  {
+    "model": "core.shipstore",
+    "pk": 1,
+    "fields": {
+      "name": "Raft",
+      "cost_multiplier": 1.0,
+      "experience_gain": 0,
+      "image": "Student_ID.jpg",
+      "buy_cost": 1000
+    }
+  },
+  {
+    "model": "core.shipstore",
+    "pk": 2,
+    "fields": {
+      "name": "Black Pearl",
+      "cost_multiplier": 100.0,
+      "experience_gain": 1000,
+      "image": "Student_ID_7U4gNxw.jpg",
+      "buy_cost": 9999999
+    }
+  },
+  {
+    "model": "core.slot",
+    "pk": 1,
+    "fields": {
+      "unlock_level": 1
+    }
+  },
+  {
+    "model": "core.slot",
+    "pk": 2,
+    "fields": {
+      "unlock_level": 3
+    }
+  }
+]

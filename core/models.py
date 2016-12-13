@@ -154,7 +154,7 @@ class ShipStore(models.Model):
     # Buy cost in gold coins
     buy_cost = models.IntegerField()
 
-    object = ShipStoreModelManager()
+    objects = ShipStoreModelManager()
 
     def __str__(self):
         return self.name
