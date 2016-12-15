@@ -1,5 +1,13 @@
+coreapi==2.1.1
 Django==1.10.4
 djangorestframework==3.5.3
 drfdocs==0.0.11
+gunicorn==19.6.0
+itypes==1.1.0
+openapi-codec==1.2.1
 Pillow==3.4.2
 psycopg2==2.6.2
+requests==2.12.3
+simplejson==3.10.0
+uritemplate==3.0.0
+whitenoise==3.2.2
