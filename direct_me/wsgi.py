@@ -11,7 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-if 'DYNO' in os.environ:
+if 'IS_HEROKU' in os.environ:
     from whitenoise.django import DjangoWhiteNoise
 
     application = get_wsgi_application()
