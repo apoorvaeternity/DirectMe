@@ -36,12 +36,12 @@ class ProfileModelManager(models.Manager):
 
         return user
 
-    def add_exp(self, profile):
-        profile.experience += 20
+    def add_exp(self, profile, exp):
+        profile.experience += exp
         profile.save()
 
-    def del_exp(self, profile):
-        profile.experience -= 20
+    def del_exp(self, profile, exp):
+        profile.experience -= exp
         profile.save()
 
 
@@ -87,6 +87,11 @@ class InventoryModelManager(models.Manager):
     def create_initial_inventory(self, user):
         for item in Item.objects.all():
             Inventory.objects.create(user=user, item=item, count=10)
+
+    def add_item(self, user, item, value):
+        inventory = Inventory.objects.get(user=user, item=item)
+        inventory.count += value
+        inventory.save()
 
 
 class Inventory(models.Model):

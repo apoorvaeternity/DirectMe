@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
+from django.utils import timezone
 from rest_framework import serializers
 
 from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType
-from player.models import Profile
+from player.models import Profile, Inventory
 
 
 class DockChartSerializer(serializers.ModelSerializer):
@@ -19,6 +20,35 @@ class DocksListSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 
+class UndockSerializer(serializers.Serializer):
+    ship_id = serializers.IntegerField(required=True)
+
+    def validate(self, attrs):
+        ship_id = attrs['ship_id']
+        try:
+            ship = Ship.objects.get(pk=ship_id)
+            if ship.is_idle():
+                raise serializers.ValidationError('Ship is idle')
+            if not ship.is_active or (not ship.belongs_to(self.context['request'].user)):
+                raise serializers.ValidationError('Incorrect ship ID')
+        except Ship.DoesNotExist:
+            raise serializers.ValidationError('Ship with the given ID doesn\'t exist')
+        return attrs
+
+    def undock(self, request):
+        ship_id = self.validated_data['ship_id']
+        ship = Ship.objects.get(pk=ship_id)
+        dock_chart = DockChart.objects.undock_ship(ship)
+
+        # TODO: Change item generation formula
+        time_fraction = timezone.now() - dock_chart.start_time
+        minutes = time_fraction.total_seconds() / 60
+        value = int(minutes) * dock_chart.ship.ship_store.cost_multiplier
+        Inventory.objects.add_item(user=request.user, item=dock_chart.port.user.profile.island.item, value=value)
+        # TODO: Change exp gain formula
+        Profile.objects.add_exp(request.user.profile, 50)
+
+
 class FineSerializer(serializers.Serializer):
     port_id = serializers.IntegerField(required=True)
 
@@ -27,21 +57,20 @@ class FineSerializer(serializers.Serializer):
         try:
             port = Port.objects.get(pk=port_id)
             if port.is_penalisable():
-                raise serializers.ValidationError('Port cannot be penalized')
+                raise serializers.ValidationError('Port cannot be fined')
+            if port.is_idle():
+                raise serializers.ValidationError('Port with the given ID is idle')
         except Port.DoesNotExist:
             raise serializers.ValidationError('Port with the given ID does not exist')
-
-        if port.is_idle():
-            raise serializers.ValidationError('Ship already docked on the port with the given ID')
-
         return attrs
 
     def fine(self, request):
         port_id = self.validated_data['port_id']
         port = Port.objects.get(pk=port_id)
         dock_chart = DockChart.objects.end_parking(port)
-        Profile.objects.add_exp(request.user.profile)
-        Profile.objects.del_exp(dock_chart.ship.user.profile)
+        Profile.objects.add_exp(request.user.profile, 20)
+        Profile.objects.del_exp(dock_chart.ship.user.profile, 20)
+
 
 class DockShipSerializer(serializers.Serializer):
     ship_id = serializers.IntegerField()
@@ -55,7 +84,7 @@ class DockShipSerializer(serializers.Serializer):
             if not (ship.is_idle() and ship.is_active and ship.belongs_to(self.context['request'].user)):
                 raise serializers.ValidationError('Incorrect ship ID')
         except Ship.DoesNotExist:
-            raise serializers.ValidationError('Ship with given ID doesnt exist')
+            raise serializers.ValidationError('Ship with given ID doesn\'t exist')
 
         port_owner_id = attrs['port_owner_id']
         try:

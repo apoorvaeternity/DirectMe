@@ -47,6 +47,13 @@ class DockChartModelManager(models.Manager):
         dock_chart.save()
         return dock_chart
 
+    def undock_ship(self, ship):
+        dock_chart = DockChart.objects.filter(ship=ship, end_time=None).first()
+        dock_chart.end_time = timezone.now()
+        dock_chart.is_success = True
+        dock_chart.save()
+        return dock_chart
+
 
 class DockChart(models.Model):
     start_time = models.DateTimeField(auto_now=True)
@@ -141,11 +148,11 @@ class Port(models.Model):
 
     def is_penalisable(self):
         if self.type.penalizable is False:
-            return False
-        return True
+            return True
+        return False
 
     def is_idle(self):
-        if DockChart.objects.filter(port=self, end_time=None).count == 0:
+        if DockChart.objects.filter(port=self, end_time=None).count() == 0:
             return True
         return False
 
