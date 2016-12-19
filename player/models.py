@@ -36,6 +36,14 @@ class ProfileModelManager(models.Manager):
 
         return user
 
+    def add_exp(self, profile):
+        profile.experience += 20
+        profile.save()
+
+    def del_exp(self, profile):
+        profile.experience -= 20
+        profile.save()
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User)

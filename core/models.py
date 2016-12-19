@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class DockModelManager(models.Manager):
@@ -38,6 +39,13 @@ class DockChartModelManager(models.Manager):
             port=free_port
 
         )
+
+    def end_parking(self, port):
+        dock_chart = DockChart.objects.get(port=port, end_time=None)
+        dock_chart.end_time = timezone.now()
+        dock_chart.is_success = False
+        dock_chart.save()
+        return dock_chart
 
 
 class DockChart(models.Model):
@@ -130,6 +138,16 @@ class Port(models.Model):
     log = models.ForeignKey('DockChart', default=None, null=True, related_name='log')
 
     objects = PortModelManager()
+
+    def is_penalisable(self):
+        if self.type.penalizable is False:
+            return False
+        return True
+
+    def is_idle(self):
+        if DockChart.objects.filter(port=self, end_time=None).count == 0:
+            return True
+        return False
 
     def __str__(self):
         return self.user.username + " : " + self.type.name

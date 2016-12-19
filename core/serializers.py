@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType
+from player.models import Profile
 
 
 class DockChartSerializer(serializers.ModelSerializer):
@@ -17,6 +18,30 @@ class DocksListSerializer(serializers.ModelSerializer):
         model = Dock
         fields = ('__all__')
 
+
+class FineSerializer(serializers.Serializer):
+    port_id = serializers.IntegerField(required=True)
+
+    def validate(self, attrs):
+        port_id = attrs['port_id']
+        try:
+            port = Port.objects.get(pk=port_id)
+            if port.is_penalisable():
+                raise serializers.ValidationError('Port cannot be penalized')
+        except Port.DoesNotExist:
+            raise serializers.ValidationError('Port with the given ID does not exist')
+
+        if port.is_idle():
+            raise serializers.ValidationError('Ship already docked on the port with the given ID')
+
+        return attrs
+
+    def fine(self, request):
+        port_id = self.validated_data['port_id']
+        port = Port.objects.get(pk=port_id)
+        dock_chart = DockChart.objects.end_parking(port)
+        Profile.objects.add_exp(request.user.profile)
+        Profile.objects.del_exp(dock_chart.ship.user.profile)
 
 class DockShipSerializer(serializers.Serializer):
     ship_id = serializers.IntegerField()

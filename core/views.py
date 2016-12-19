@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from core.models import ShipStore, Version, Dock, Ship, Port, DockChart
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
-    PortsListSerializer, ShipsListSerializer
+    PortsListSerializer, ShipsListSerializer, FineSerializer
 from player.models import Inventory
 
 
@@ -19,10 +19,11 @@ class DocksListView(APIView):
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = DocksListSerializer
 
     def get(self, request):
         ships = get_list_or_404(Dock, user_id=request.user.id)
-        serializer = DocksListSerializer(ships, many=True)
+        serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -49,30 +50,36 @@ class FineView(APIView):
     """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = FineSerializer
 
-    def get(self, request, port_id):
-        port = Port.objects.get(pk=port_id)
-        if port.type.penalizable is False:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        dock_chart_instance = DockChart.objects.filter(port=port, end_time=None).first()
+    def post(self, request):
+        serializer = self.serializer_class(data=self.request.data)
+        if serializer.is_valid(request):
+            serializer.fine(request)
+            return Response(status=status.HTTP_200_OK)
 
-        # No ship standing on this
-        if dock_chart_instance is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        # port_id = 0
+        # port = Port.objects.get(pk=port_id)
+        # if port.type.penalizable is False:
+        #     return Response(status=status.HTTP_400_BAD_REQUEST)
+        # dock_chart_instance = DockChart.objects.filter(port=port, end_time=None).first()
+        #
+        # # No ship standing on this
+        # if dock_chart_instance is None:
+        #     return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # End the parking
-        dock_chart_instance.end_time = timezone.now()
-        dock_chart_instance.is_success = False
-        dock_chart_instance.save()
+        # dock_chart_instance.end_time = timezone.now()
+        # dock_chart_instance.is_success = False
+        # dock_chart_instance.save()
 
-        self.request.user.profile.experience += 20
+        # self.request.user.profile.experience += 20
 
         # TODO: Check for non negative exp
-        dock_chart_instance.ship.user.profile.experience -= 20
+        # dock_chart_instance.ship.user.profile.experience -= 20
 
-        self.request.user.profile.save()
-        dock_chart_instance.ship.user.profile.save()
-        return Response(status=status.HTTP_200_OK)
+        # self.request.user.profile.save()
+        # dock_chart_instance.ship.user.profile.save()
 
 
 class PortsListView(APIView):
@@ -82,10 +89,11 @@ class PortsListView(APIView):
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = PortsListSerializer
 
     def get(self, request):
         ports = get_list_or_404(Port, user_id=request.user.id)
-        serializer = PortsListSerializer(ports, many=True)
+        serializer = self.serializer_class(ports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -96,10 +104,11 @@ class ShipsListView(APIView):
 
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
+    serializer_class = ShipsListSerializer
 
     def get(self, request):
         ships = get_list_or_404(Ship, user_id=request.user.id, is_active=True)
-        serializer = ShipsListSerializer(ships, many=True)
+        serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
