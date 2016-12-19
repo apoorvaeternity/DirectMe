@@ -6,45 +6,37 @@ from rest_framework.test import APITestCase
 from player.models import Profile
 
 
-# Create your tests here.
-
 def setUpModule():
     print("Module setup...")
     call_command('loaddata', 'db.json', verbosity=0)
 
 
-# def teardownModule():
-#     print("Module teardown...")
-#     call_command('flush', interactive=False, verbosity=0)
+class UserRegistrationTests(APITestCase):
+    url = reverse('register')
 
-
-class ProfileTests(APITestCase):
     def test_register_user(self):
         """
         Ensure we can register a new user profile
         """
 
-        url = reverse('register')
-        data = {'username': 'shobhit', 'email': 'shobhit@gmail.com', 'password': 'directme'}
-        response = self.client.post(url, data)
+        data = {'username': 'some_username', 'email': 'some_email@gmail.com', 'password': 'some_password'}
+
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Profile.objects.count(), 1)
-        self.assertEqual(Profile.objects.get().user.username, 'shobhit')
+        self.assertEqual(Profile.objects.get().user.username, 'some_username')
 
-    def test_login(self):
+    def test_email_required(self):
         """
-        Check login of user
+        Ensure that email field is required and cannot be submitted blank
         """
 
-        # url = reverse('register')
-        # data = {'username': 'shobhit', 'email': 'shobhit@gmail.com', 'password': 'directme'}
-        # response = self.client.post(url, data)
+        data = {'username': 'some_username', 'email': '', 'password': 'some_password'}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Profile.objects.count(), 0)
 
-        url = reverse('login')
-        data = {'username': 'shobhit', 'password': 'wrongpassword'}
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        data = {'username': 'shobhit', 'password': 'directme'}
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {'username': 'some_username', 'password': 'some_password'}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Profile.objects.count(), 0)
