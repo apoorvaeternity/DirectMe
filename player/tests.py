@@ -92,6 +92,9 @@ class UserViewTests(APITestCase):
         self.assertEqual(len(response.data), 5)
 
     def test_update_user_details(self):
+        """
+        Ensure that the change in the fields are saved
+        """
         user = Profile.objects.create_player(username='some_username', password='some_password',
                                              email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
@@ -105,3 +108,22 @@ class UserViewTests(APITestCase):
 
         user.refresh_from_db()
         self.assertEqual(user.first_name, 'Jon')
+
+
+class GCMTokenViewTests(APITestCase):
+    url = reverse('gcm')
+
+    def test_update_gcm_token(self):
+        """
+        Ensure that the change in the GCM token are saved
+        """
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        data = {'gcm_token': 'some_dragon_token_maybe'}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user.profile.refresh_from_db()
+        self.assertEqual(user.profile.gcm_token, 'some_dragon_token_maybe')
