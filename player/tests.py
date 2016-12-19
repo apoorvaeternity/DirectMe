@@ -40,3 +40,31 @@ class UserRegistrationTests(APITestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Profile.objects.count(), 0)
+
+
+class UserAuthenticationTests(APITestCase):
+    url = reverse('login')
+
+    def test_valid_user_auth(self):
+        """
+        Ensure we  get token in case of correct credentials
+        """
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        data = {'username': 'some_username', 'password': 'some_password'}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['token'], user.auth_token.key)
+
+    def test_invalid_user_auth(self):
+        """
+        Ensure we do not get token in case of wrong credentials
+        """
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        data = {'username': 'some_username', 'password': 'wrong_password'}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual('token' in response.data, False)
