@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'rest_framework_docs',
     'player',
     'core',
-    'rest_framework_swagger',
 ]
 
 MIDDLEWARE_CLASSES = [
