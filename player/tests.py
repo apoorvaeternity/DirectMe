@@ -127,3 +127,23 @@ class GCMTokenViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         user.profile.refresh_from_db()
         self.assertEqual(user.profile.gcm_token, 'some_dragon_token_maybe')
+
+
+class UserPasswordUpdateViewTests(APITestCase):
+    url = reverse('reset-password')
+
+    def test_update_passowrd(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        data = {'password': 'a_new_password'}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = {'username': 'some_username', 'password': 'a_new_password'}
+        response = self.client.post(reverse('login'), data)
+        user.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['token'], user.auth_token.key)

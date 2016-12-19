@@ -5,7 +5,7 @@ urlpatterns = [
     url(r'^register/', UserRegistrationView.as_view(), name='register'),
     url(r'^gcm/', GCMTokenView.as_view(), name='gcm'),
     url(r'^login/', UserAuthenticationView.as_view(), name='login'),
-    url(r'^password-reset/', UserPasswordUpdateView.as_view()),
+    url(r'^password-reset/', UserPasswordUpdateView.as_view(), name='reset-password'),
     url(r'', UserView.as_view(), name='user'),
 
 ]
