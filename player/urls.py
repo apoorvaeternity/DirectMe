@@ -6,6 +6,6 @@ urlpatterns = [
     url(r'^gcm/', GCMTokenView.as_view()),
     url(r'^login/', UserAuthenticationView.as_view(), name='login'),
     url(r'^password-reset/', UserPasswordUpdateView.as_view()),
-    url(r'', UserView.as_view()),
+    url(r'', UserView.as_view(), name='user'),
 
 ]

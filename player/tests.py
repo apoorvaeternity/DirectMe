@@ -68,3 +68,40 @@ class UserAuthenticationTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual('token' in response.data, False)
+
+
+class UserViewTests(APITestCase):
+    url = reverse('user')
+
+    def test_get_user_details(self):
+        """
+        Ensure the user is setup properly and no unwanted details are revealed
+        """
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], 'some_username')
+        self.assertEqual(response.data['email'], 'some_email@gmail.com')
+        self.assertEqual(response.data['first_name'], '')
+        self.assertEqual(response.data['last_name'], '')
+        self.assertEqual(response.data['experience'], 10)
+        self.assertEqual(len(response.data), 5)
+
+    def test_update_user_details(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        data = {'first_name': 'Jon'}
+        response = self.client.put(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['first_name'], 'Jon')
+        self.assertEqual(response.data['last_name'], '')
+
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, 'Jon')
