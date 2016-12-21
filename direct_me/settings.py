@@ -22,13 +22,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#TODO: Remove this
+# TODO: Remove this
 SECRET_KEY = '3__eu+zc19hdnok^+6a$dez25whb)r8z+_pvg%cmo#thna3nsh'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['direct-me.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['direct-me.herokuapp.com', '127.0.0.1']
 
 # Application definition
 
@@ -85,7 +85,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'direct_me',
-        'ATOMIC_REQUESTS': True
+        'ATOMIC_REQUESTS': True,
+        'USER': 'shobhit',
+        'PASSWORD': 'shobhit'
     }
 }
 
@@ -135,13 +137,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 if 'IS_HEROKU' in os.environ:
-
     PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
     STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-
 STATIC_URL = '/static/'
-

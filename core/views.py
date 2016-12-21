@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from core.models import ShipStore, Version, Dock, Ship, Port
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
-    PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer
+    PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, UpdateShipSerializer
 
 
 class DocksListView(APIView):
@@ -141,4 +141,19 @@ class UndockShipView(APIView):
         if serializer.is_valid(request):
             serializer.undock(request)
             return Response(status=status.HTTP_200_OK)
-       
+
+
+class UpdateShipView(APIView):
+    """
+    Update user's ship
+    """
+
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UpdateShipSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=self.request.data, context={'request': request})
+        if serializer.is_valid(request):
+            serializer.updateShip()
+            return Response(status=status.HTTP_200_OK)

@@ -17,6 +17,11 @@ class DockModelManager(models.Manager):
         """
         return Dock.objects.filter(user=user).order_by('slot__unlock_level').first()
 
+    def update_ship_docked(self, previous_ship, current_ship):
+        dock_instance = Dock.objects.get(ship=previous_ship)
+        dock_instance.ship = current_ship
+        dock_instance.save()
+
 
 # Garage
 class Dock(models.Model):
@@ -174,6 +179,27 @@ class Ship(models.Model):
     upgrade_to = models.ForeignKey("self", default=None, null=True, blank=True)
     upgraded_at = models.DateTimeField(blank=True, null=True)
 
+    def update(self, next_ship_store, user):
+        next_ship_instance = Ship.objects.create(ship_store=next_ship_store, user=user)
+        self.is_active = False
+        self.upgrade_to = next_ship_instance
+        self.upgraded_at = timezone.now()
+        self.save()
+
+        return next_ship_instance
+
+    def check_inventory(self, user):
+        ships = ShipStore.objects.all().order_by('buy_cost')
+        upgrade_to_ship = ships.get(buy_cost__gt=self.ship_store.buy_cost)
+        items_required = ShipUpgrade.objects.filter(ship_store=upgrade_to_ship)
+        from player.models import Inventory
+        user_items = Inventory.objects.filter(user=user)
+        for item_required in items_required:
+            item_acquired = user_items.get(item=item_required.item_id)
+            if item_required.count > item_acquired.count:
+                return False
+        return True
+
     def belongs_to(self, user):
         if self.user == user:
             return True
@@ -216,10 +242,26 @@ class ShipStore(models.Model):
         return self.name
 
 
+class ShipUpgradeModelManager(models.Manager):
+    def consume_inventory(self, ship, user):
+        ships = ShipStore.objects.all().order_by('buy_cost')
+        upgrade_to_shipstore = ships.get(buy_cost__gt=ship.ship_store.buy_cost)
+        items_required = ShipUpgrade.objects.filter(ship_store=upgrade_to_shipstore)
+        from player.models import Inventory
+        user_items = Inventory.objects.filter(user=user)
+        for item_required in items_required:
+            item_acquired = user_items.get(item=item_required.item_id)
+            item_acquired.count -= item_required.count
+            item_acquired.save()
+
+        return upgrade_to_shipstore
+
+
 class ShipUpgrade(models.Model):
     ship_store = models.ForeignKey('ShipStore', related_name='items_required', on_delete=models.CASCADE)
     count = models.IntegerField()
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE)
+    objects = ShipUpgradeModelManager()
 
     def __str__(self):
         return self.ship_store.name + " : " + str(self.count) + " " + self.item_id.name

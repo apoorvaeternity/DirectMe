@@ -20,6 +20,36 @@ class DocksListSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 
+class UpdateShipSerializer(serializers.Serializer):
+    ship_id = serializers.IntegerField(required=True)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        ship_id = attrs['ship_id']
+        try:
+            ship = Ship.objects.get(pk=ship_id)
+            if not ship.is_idle():
+                raise serializers.ValidationError('Ship is not idle')
+            if not (ship.is_active and ship.belongs_to(user)):
+                raise serializers.ValidationError('Incorrect ship ID')
+        except Ship.DoesNotExist:
+            raise serializers.ValidationError('Ship with the given ID doesn\'t exist')
+
+        if not ship.check_inventory(user):
+            raise serializers.ValidationError('Insufficient items')
+
+        return attrs
+
+    def updateShip(self):
+        user = self.context['request'].user
+        ship_id = self.validated_data['ship_id']
+        ship = Ship.objects.get(pk=ship_id)
+        next_ship_store = ShipUpgrade.objects.consume_inventory(ship, user)
+        next_ship_instance = ship.update(next_ship_store=next_ship_store, user=user)
+        Profile.objects.add_exp(user.profile, next_ship_store.experience_gain)
+        Dock.objects.update_ship_docked(ship, next_ship_instance)
+
+
 class UndockSerializer(serializers.Serializer):
     ship_id = serializers.IntegerField(required=True)
 
@@ -29,7 +59,7 @@ class UndockSerializer(serializers.Serializer):
             ship = Ship.objects.get(pk=ship_id)
             if ship.is_idle():
                 raise serializers.ValidationError('Ship is idle')
-            if not ship.is_active or (not ship.belongs_to(self.context['request'].user)):
+            if not (ship.is_active and ship.belongs_to(self.context['request'].user)):
                 raise serializers.ValidationError('Incorrect ship ID')
         except Ship.DoesNotExist:
             raise serializers.ValidationError('Ship with the given ID doesn\'t exist')
