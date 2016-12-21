@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserProfileSerializer, \
-    UserGcmSerializer, UserPasswordSerializer
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
+    UserPasswordSerializer, UserProfileSerializer
 
 
 class UserRegistrationView(APIView):

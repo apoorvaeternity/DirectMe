@@ -2,15 +2,20 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from core.serializers import InventorySerializer
 from .models import Profile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    # todo to be added
+    # avatar = serializers.ReadOnlyField(source='profile.avatar', read_only=True)
+    island = serializers.ReadOnlyField(source='profile.island.name', read_only=True)
     experience = serializers.ReadOnlyField(source='profile.experience', read_only=True)
+    inventory = InventorySerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'experience')
+        fields = ('username', 'email', 'first_name', 'last_name', 'island', 'experience', 'inventory')
         read_only_fields = ('username', 'email', 'experience')
 
 

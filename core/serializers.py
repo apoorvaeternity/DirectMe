@@ -176,6 +176,14 @@ class ShipUpgradeDetailSerializer(serializers.ModelSerializer):
         fields = ('item_id', 'name', 'count')
 
 
+class InventorySerializer(serializers.ModelSerializer):
+    item = serializers.ReadOnlyField(source='item.name', read_only=True)
+
+    class Meta:
+        model = Inventory
+        fields = ('item', 'count',)
+
+
 class ShipStoreSerializer(serializers.ModelSerializer):
     items_required = ShipUpgradeDetailSerializer(many=True, read_only=True)
 
