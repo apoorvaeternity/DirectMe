@@ -86,8 +86,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'direct_me',
         'ATOMIC_REQUESTS': True,
-        'USER': 'shobhit',
-        'PASSWORD': 'shobhit'
+        # 'USER': 'shobhit',
+        # 'PASSWORD': 'shobhit'
     }
 }
 
