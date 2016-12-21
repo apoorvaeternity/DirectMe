@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework import serializers
 
-from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType
+from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType, FineLog
 from player.models import Profile, Inventory
 
 
@@ -98,8 +98,10 @@ class FineSerializer(serializers.Serializer):
         port_id = self.validated_data['port_id']
         port = Port.objects.get(pk=port_id)
         dock_chart = DockChart.objects.end_parking(port)
+        # Todo remove static data
         Profile.objects.add_exp(request.user.profile, 20)
         Profile.objects.del_exp(dock_chart.ship.user.profile, 20)
+        FineLog.objects.create_log(amount=20, dock_chart=dock_chart, )
 
 
 class DockShipSerializer(serializers.Serializer):

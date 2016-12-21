@@ -73,9 +73,16 @@ class DockChart(models.Model):
         return self.ship.ship_store.name + " : " + str(self.start_time)
 
 
+class FineLogModelManager(models.Manager):
+    def create_log(self, amount, dock_chart):
+        return FineLog.objects.create(amount=amount, dock_chart=dock_chart)
+
+
 class FineLog(models.Model):
     amount = models.IntegerField()
     dock_chart = models.ForeignKey('DockChart')
+
+    objects = FineLogModelManager()
 
 
 class Island(models.Model):
