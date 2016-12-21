@@ -96,7 +96,7 @@ class InventoryModelManager(models.Manager):
 
 class Inventory(models.Model):
     count = models.IntegerField()
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='inventory')
     item = models.ForeignKey(Item)
 
     objects = InventoryModelManager()
