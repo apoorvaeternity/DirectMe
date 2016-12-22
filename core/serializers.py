@@ -20,8 +20,7 @@ class DockPirateIslandSerializer(serializers.Serializer):
         except Ship.DoesNotExist:
             raise serializers.ValidationError('Ship with the given ID does not exist')
 
-        pirate_ports = Port.objects.filter(type__ownable=False)
-        if pirate_ports.count() == 0:
+        if Port.objects.pirate_port_available():
             raise serializers.ValidationError('Pirate ports doesn\'t exist')
 
         if not DockChart.objects.is_available():

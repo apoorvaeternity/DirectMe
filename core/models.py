@@ -62,7 +62,7 @@ class DockChartModelManager(models.Manager):
     def allocate_pirate_port(self, ship):
         pirate_ports = Port.objects.filter(type__ownable=False)
         for pirate_port in pirate_ports:
-            if DockChart.objects.filter(port=pirate_port, end_time=None).count() != 0:
+            if DockChart.objects.filter(port=pirate_port, end_time=None).count() == 0:
                 return DockChart.objects.create(ship=ship, port=pirate_port)
 
     # check pirate port availability
@@ -168,6 +168,12 @@ class PortModelManager(models.Manager):
 
     def get_empty_port(self, user, type):
         return Port.objects.filter(user=user, type=type, log=None).first()
+
+    def pirate_port_available(self):
+        pirate_ports = Port.objects.filter(type__ownable=False)
+        if pirate_ports.count() == 0:
+            return False
+        return True
 
 
 # Parking
