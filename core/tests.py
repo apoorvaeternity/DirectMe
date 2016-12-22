@@ -3,13 +3,123 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from core.models import Dock, ShipStore
+from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart
 from player.models import Profile, Inventory
 
 
 def setUpModule():
     print("Module setup...")
     call_command('loaddata', 'db.json', verbosity=0)
+
+
+class DockPirateIslandTests(APITestCase):
+    url = reverse('pirate-island')
+
+    def test_invalid_ship(self):
+        """Ensure the ship is incorrect"""
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+
+        ship_id = 90
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Ship with the given ID does not exist")
+
+    def test_ship_active(self):
+        """Ensure if ship is active"""
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+
+        ship = Ship.objects.get(user=user)
+        ship.is_active = False
+        ship.save()
+        data = {'ship_id': ship.id}
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Ship doesn\'t exist")
+
+    def test_ship_idle(self):
+        """Ensure the ship is idle"""
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
+        ship = Ship.objects.get(user=user)
+        DockChart.objects.create(ship=ship, port=pirate_port)
+
+        ship_id = ship.id
+
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Ship is not idle")
+
+    def test_pirate_port_exists(self):
+        """Ensure pirate ports exists"""
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        ship = Ship.objects.get(user=user)
+        ship_id = ship.id
+
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Pirate ports doesn\'t exist")
+
+    def test_pirate_port_idle(self):
+        """Ensure that atleast one pirate port is idle"""
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
+        ship = Ship.objects.get(user=user)
+        DockChart.objects.create(ship=ship, port=pirate_port)
+
+        ship = Ship.objects.create(user=user, ship_store=ShipStore.objects.first())
+        ship_id = ship.id
+
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "No idle pirate port available")
+
+    def test_dock_ship(self):
+        """Ensure user can dock ship"""
+        """Ensure that atleast one pirate port is idle"""
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
+        ship = Ship.objects.get(user=user)
+        ship_id = ship.id
+
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        dock_chart = DockChart.objects.get(port=pirate_port, ship=ship)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(dock_chart.ship.ship_store.name, ship.ship_store.name)
 
 
 class BuyShipTests(APITestCase):

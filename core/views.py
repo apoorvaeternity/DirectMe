@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 
 from core.models import ShipStore, Version, Dock, Ship, Port
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
-    PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, UpdateShipSerializer, BuyShipSerializer
+    DockPirateIslandSerializer, PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, \
+    UpdateShipSerializer, BuyShipSerializer
 
 
 class BuyShipView(APIView):
@@ -142,6 +143,7 @@ class FineView(APIView):
         if serializer.is_valid():
             serializer.fine(request)
             return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UndockShipView(APIView):
@@ -158,6 +160,7 @@ class UndockShipView(APIView):
         if serializer.is_valid():
             serializer.undock(request)
             return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateShipView(APIView):
@@ -174,3 +177,21 @@ class UpdateShipView(APIView):
         if serializer.is_valid():
             serializer.updateShip()
             return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DockPirateIsland(APIView):
+    """
+    Dock a ship at pirate island
+    """
+
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DockPirateIslandSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=self.request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
