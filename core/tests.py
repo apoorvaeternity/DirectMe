@@ -101,6 +101,26 @@ class DockPirateIslandTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['non_field_errors'][0], "No idle pirate port available")
 
+    def test_dock_ship(self):
+        """Ensure user can dock ship"""
+        """Ensure that atleast one pirate port is idle"""
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
+        ship = Ship.objects.get(user=user)
+        ship_id = ship.id
+
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        dock_chart = DockChart.objects.get(port=pirate_port, ship=ship)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(dock_chart.ship.ship_store.name, ship.ship_store.name)
+
 
 class BuyShipTests(APITestCase):
     url = reverse('buy-ship')
