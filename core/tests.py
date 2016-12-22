@@ -19,9 +19,13 @@ class BuyShipTests(APITestCase):
         user = Profile.objects.create_player(username='some_username', password='some_password',
                                              email='some_email@gmail.com')
 
-        # TODO: fix the dock_id -- dont hardcode
+        docks = Dock.objects.filter(user=user)
+        # Create incorrect dock_id
+        dock_id = 0
+        for dock in docks:
+            dock_id += dock.id
 
-        data = {'dock_id': '100'}
+        data = {'dock_id': dock_id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         response = self.client.post(self.url, data)
 
