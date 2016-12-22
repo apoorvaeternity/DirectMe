@@ -6,6 +6,33 @@ from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, 
 from player.models import Profile, Inventory
 
 
+class DockPirateIslandSerializer(serializers.Serializer):
+    ship_id = serializers.IntegerField(required=True)
+
+    def validate(self, attrs):
+        try:
+            ship = Ship.objects.get(pk=attrs['ship_id'])
+            if not ship.is_active:
+                raise serializers.ValidationError('Ship doesn\'t exist')
+            if not ship.is_idle():
+                raise serializers.ValidationError('Ship is not idle')
+
+        except Ship.DoesNotExist:
+            raise serializers.ValidationError('Ship with the given ID does not exist')
+
+        pirate_ports = Port.objects.filter(type__ownable=False)
+        if pirate_ports.count() == 0:
+            raise serializers.ValidationError('Pirate ports doesn\'t exist')
+
+        if not DockChart.objects.is_available():
+            raise serializers.ValidationError('No idle pirate port available')
+        return attrs
+
+    def create(self, validated_data):
+        ship = Ship.objects.get(pk=validated_data['ship_id'])
+        return DockChart.objects.allotcate_pirate_port(ship)
+
+
 class DockChartSerializer(serializers.ModelSerializer):
     class Meta:
         model = DockChart

@@ -59,6 +59,30 @@ class DockChartModelManager(models.Manager):
         dock_chart.save()
         return dock_chart
 
+    def allotcate_pirate_port(self, ship):
+        global pirate_port
+        pirate_ports = Port.objects.filter(type__ownable=False)
+        for pirate_port in pirate_ports:
+            if DockChart.objects.filter(port=pirate_port, end_time=None).count() != 0:
+                port_found = True
+                break
+
+        return DockChart.objects.create(ship=ship, port=pirate_port)
+
+    # check pirate port availability
+    def is_available(self):
+        port_available = False
+        pirate_ports = Port.objects.filter(type__ownable=False)
+        for pirate_port in pirate_ports:
+            if DockChart.objects.filter(port=pirate_port, end_time=None).count() == 0:
+                port_available = True
+                break
+
+        if port_available:
+            return True
+        else:
+            return False
+
 
 class DockChart(models.Model):
     start_time = models.DateTimeField(auto_now=True)
