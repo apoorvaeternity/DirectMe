@@ -7,7 +7,24 @@ from rest_framework.views import APIView
 
 from core.models import ShipStore, Version, Dock, Ship, Port
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
-    PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, UpdateShipSerializer
+    PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, UpdateShipSerializer, BuyShipSerializer
+
+
+class BuyShipView(APIView):
+    """
+    Buy a new ship
+    """
+
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = BuyShipSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DocksListView(APIView):
@@ -36,7 +53,7 @@ class DockShipView(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={'request': request})
-        if serializer.is_valid(request):
+        if serializer.is_valid():
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -122,7 +139,7 @@ class FineView(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data)
-        if serializer.is_valid(request):
+        if serializer.is_valid():
             serializer.fine(request)
             return Response(status=status.HTTP_200_OK)
 
@@ -138,7 +155,7 @@ class UndockShipView(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data, context={'request': request})
-        if serializer.is_valid(request):
+        if serializer.is_valid():
             serializer.undock(request)
             return Response(status=status.HTTP_200_OK)
 
@@ -154,6 +171,6 @@ class UpdateShipView(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data, context={'request': request})
-        if serializer.is_valid(request):
+        if serializer.is_valid():
             serializer.updateShip()
             return Response(status=status.HTTP_200_OK)

@@ -2,8 +2,57 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework import serializers
 
-from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType, FineLog
-from player.models import Profile, Inventory
+from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType, FineLog, Level
+from player.models import Profile
+
+
+class BuyShipSerializer(serializers.Serializer):
+    dock_id = serializers.IntegerField(required=True)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        dock_id = attrs['dock_id']
+
+        # Check if dock exists and belongs to the user
+        # try:
+        #     # dock = user.dock.objects.get(pk=dock_id)
+        #     #TODO Fix this test
+        #     # Gives none when not found
+        dock = Dock.objects.filter(user=user, pk=dock_id).first()
+        if dock is None:
+            raise serializers.ValidationError("Incorrect Dock ID")
+        # print(dock)
+        # except Dock.DoesNotExist:
+        #     raise serializers.ValidationError("Incorrect Dock ID")
+
+        # Calculate user's level
+        user_experience = user.profile.experience
+        user_level = Level.objects.filter(experience_required__lte=user_experience).order_by(
+            '-experience_required').first().level_number
+
+        # Check if dock is unlocked
+        print(dock.slot.unlock_level.level_number)
+        print(user_level)
+        if dock.slot.unlock_level.level_number > user_level:
+            raise serializers.ValidationError("Dock is not unlocked")
+
+        # Check if dock is vacant or not
+        if dock.ship is not None:
+            raise serializers.ValidationError("Dock is already occupied")
+
+        # Check if user has sufficient funds to buy raft or not
+        from player.models import Inventory
+        user_gold_count = Inventory.objects.filter(user=user, item__name__icontains='Gold').first().count
+        buy_cost = ShipStore.objects.order_by('buy_cost').first().buy_cost
+        if user_gold_count < buy_cost:
+            raise serializers.ValidationError("User doesn't have sufficient Gold")
+
+        return attrs
+
+    def save(self):
+        dock_id = self.validated_data['dock_id']
+        dock = Dock.objects.get(pk=dock_id)
+        dock.allocate_raft()
 
 
 class DockChartSerializer(serializers.ModelSerializer):
@@ -74,6 +123,7 @@ class UndockSerializer(serializers.Serializer):
         time_fraction = timezone.now() - dock_chart.start_time
         minutes = time_fraction.total_seconds() / 60
         value = int(minutes) * dock_chart.ship.ship_store.cost_multiplier
+        from player.models import Inventory
         Inventory.objects.add_item(user=request.user, item=dock_chart.port.user.profile.island.item, value=value)
         # TODO: Change exp gain formula
         Profile.objects.add_exp(request.user.profile, 50)
@@ -174,6 +224,9 @@ class ShipUpgradeDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShipUpgrade
         fields = ('item_id', 'name', 'count')
+
+
+from player.models import Inventory
 
 
 class InventorySerializer(serializers.ModelSerializer):
