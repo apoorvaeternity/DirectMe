@@ -30,7 +30,7 @@ class DockPirateIslandSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         ship = Ship.objects.get(pk=validated_data['ship_id'])
-        return DockChart.objects.allotcate_pirate_port(ship)
+        return DockChart.objects.allocate_pirate_port(ship)
 
 
 class DockChartSerializer(serializers.ModelSerializer):
