@@ -25,11 +25,20 @@ class DockModelManager(models.Manager):
 
 # Garage
 class Dock(models.Model):
-    user = models.ForeignKey(User)
-    slot = models.ForeignKey('Slot')
+    user = models.ForeignKey(User, related_name='dock')
+    slot = models.ForeignKey('Slot', related_name='slot')
     ship = models.ForeignKey('Ship', default=None, null=True)
 
     objects = DockModelManager()
+
+    def allocate_raft(self):
+        # Assign raft here
+
+        ship = ShipStore.objects.buy_raft(user=self.user)
+        self.ship = ship
+        self.save()
+
+        return ship
 
 
 class DockChartModelManager(models.Manager):
@@ -222,6 +231,20 @@ class Ship(models.Model):
 
 
 class ShipStoreModelManager(models.Manager):
+    def buy_raft(self, user):
+        raft = ShipStore.objects.order_by('buy_cost').first()
+        ship = Ship.objects.create(ship_store=raft, user=user)
+
+        # Decrement user gold
+
+        from player.models import Inventory
+        gold = Inventory.objects.filter(user=user, item__name__icontains='Gold').first()
+        gold.count -= ship.ship_store.buy_cost
+        gold.save()
+
+        ship.save()
+        return ship
+
     def allocate_initial_ship(self, user):
         """
         Assigns initial raft to the user

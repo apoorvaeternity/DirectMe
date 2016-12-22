@@ -24,7 +24,8 @@ class Migration(migrations.Migration):
                 ('gcm_token', models.CharField(max_length=255)),
                 ('auth_token', models.CharField(max_length=255)),
                 (
-                'user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                    'user',
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]
