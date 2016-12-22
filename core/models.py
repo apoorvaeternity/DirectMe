@@ -196,7 +196,7 @@ class Ship(models.Model):
         return next_ship_instance
 
     def check_inventory(self, user):
-        ships = ShipStore.objects.all().filter(buy_cost__gt=self.ship_store.buy_cost).order_by('buy_cost')
+        ships = ShipStore.objects.filter(buy_cost__gt=self.ship_store.buy_cost).order_by('buy_cost')
         upgrade_to_ship = ships.exclude(ship=self).first()
         items_required = ShipUpgrade.objects.filter(ship_store=upgrade_to_ship)
         from player.models import Inventory
@@ -251,7 +251,7 @@ class ShipStore(models.Model):
 
 class ShipUpgradeModelManager(models.Manager):
     def consume_inventory(self, ship, user):
-        ships = ShipStore.objects.all().filter(buy_cost__gt=ship.ship_store.buy_cost).order_by('buy_cost')
+        ships = ShipStore.objects.filter(buy_cost__gt=ship.ship_store.buy_cost).order_by('buy_cost')
         upgrade_to_shipstore = ships.exclude(ship=ship).first()
         items_required = ShipUpgrade.objects.filter(ship_store=upgrade_to_shipstore)
         from player.models import Inventory
