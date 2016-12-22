@@ -13,18 +13,9 @@ class BuyShipSerializer(serializers.Serializer):
         user = self.context['request'].user
         dock_id = attrs['dock_id']
 
-        # Check if dock exists and belongs to the user
-        # try:
-        #     # dock = user.dock.objects.get(pk=dock_id)
-        #     #TODO Fix this test
-        #     # Gives none when not found
         dock = Dock.objects.filter(user=user, pk=dock_id).first()
         if dock is None:
             raise serializers.ValidationError("Incorrect Dock ID")
-        # print(dock)
-        # except Dock.DoesNotExist:
-        #     raise serializers.ValidationError("Incorrect Dock ID")
-
         # Calculate user's level
         user_experience = user.profile.experience
         user_level = Level.objects.filter(experience_required__lte=user_experience).order_by(
