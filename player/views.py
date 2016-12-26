@@ -1,9 +1,13 @@
+from random import randint
+
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.models import Port
+from core.serializers import SuggestionListSerializer
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
     UserPasswordSerializer, UserProfileSerializer
 
@@ -90,4 +94,56 @@ class UserPasswordUpdateView(APIView):
             request.user.set_password(serializer.validated_data['password'])
             request.user.save()
             return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SuggestionListView(APIView):
+    """
+    Get suggestions
+    """
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = SuggestionListSerializer
+
+    def response_format(self, result, user, parking_ports, non_parking_ports):
+        result.append({
+            'name ': user.username,
+            'user_id': user.id,
+            'parking': parking_ports,
+            'non-parking': non_parking_ports
+        })
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            data = serializer.validated_data['users']
+
+            # initialize
+            response = []
+            count = data.count()
+            while len(response) < min(5, count) and not len(data) == 0:
+
+                random_index = randint(0, data.count() - 1)
+                user = data[random_index]
+
+                # remove already selected user from qureyset
+                data = data.exclude(id=user.id)
+
+                no_of_parking_ports = 0
+                no_of_non_parking_ports = 0
+
+                parking_ports = Port.objects.get_parking_ports(user)
+                for port in parking_ports:
+                    if port.is_idle():
+                        no_of_parking_ports += 1
+
+                non_parking_ports = Port.objects.get_non_parking_ports(user)
+                for port in non_parking_ports:
+                    if port.is_idle():
+                        no_of_non_parking_ports += 1
+
+                if not (no_of_non_parking_ports == 0 or non_parking_ports == 0):
+                    self.response_format(response, user, no_of_parking_ports, no_of_non_parking_ports)
+            return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
