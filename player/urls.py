@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from core.views import ShipsListView
-from .views import UserRegistrationView, UserAuthenticationView, UserView, GCMTokenView, UserPasswordUpdateView
+from .views import UserRegistrationView, UserAuthenticationView, UserView, GCMTokenView, UserPasswordUpdateView, \
+    SuggestionListView
 
 urlpatterns = [
     url(r'^register/', UserRegistrationView.as_view(), name='register'),
@@ -9,6 +10,6 @@ urlpatterns = [
     url(r'^login/', UserAuthenticationView.as_view(), name='login'),
     url(r'^password-reset/', UserPasswordUpdateView.as_view(), name='reset-password'),
     url(r'^ships/$', ShipsListView.as_view(), name='ships'),
+    url(r'^get-suggestions/$', SuggestionListView.as_view(), name='suggestions'),
     url(r'', UserView.as_view(), name='user'),
-
 ]

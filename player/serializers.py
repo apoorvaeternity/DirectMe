@@ -9,13 +9,16 @@ from .models import Profile
 class UserProfileSerializer(serializers.ModelSerializer):
     # todo to be added
     # avatar = serializers.ReadOnlyField(source='profile.avatar', read_only=True)
-    island = serializers.ReadOnlyField(source='profile.island.name', read_only=True)
+    user_id = serializers.ReadOnlyField(source='id', read_only=True)
+    island_name = serializers.ReadOnlyField(source='profile.island.name', read_only=True)
+    island_id = serializers.ReadOnlyField(source='profile.island.id', read_only=True)
     experience = serializers.ReadOnlyField(source='profile.experience', read_only=True)
     inventory = InventorySerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'island', 'experience', 'inventory')
+        fields = ('username', 'user_id', 'email', 'first_name', 'last_name', 'island_id', 'island_name', 'experience',
+                  'inventory')
         read_only_fields = ('username', 'email', 'experience')
 
 

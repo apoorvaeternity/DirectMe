@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework import serializers
 
-from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType, FineLog, Level
+from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType, FineLog, Level, Island
 from player.models import Profile
 
 
@@ -84,6 +84,31 @@ class DocksListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dock
         fields = ('__all__')
+
+
+class SuggestionListSerializer(serializers.Serializer):
+    island_id = serializers.IntegerField()
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        island = Island.objects.filter(pk=attrs['island_id'])
+
+        if island.count() == 0:
+            raise serializers.ValidationError('Island with the given ID doesn\'t exist')
+        island = island.first()
+        if not island.habitable:
+            raise serializers.ValidationError('Given island is pirate island')
+
+        users = User.objects.filter(profile__island=island)
+        if user.profile.island.__eq__(island):
+            users = users.exclude(id=user.id)
+
+        if users.count() == 0:
+            raise serializers.ValidationError('No user exists for the given island')
+
+        attrs['users'] = users
+
+        return attrs
 
 
 class UpdateShipSerializer(serializers.Serializer):
@@ -193,15 +218,19 @@ class DockShipSerializer(serializers.Serializer):
 
         port_type = attrs['port_type']
         try:
-            PortType.objects.get(name=port_type)
+            type = PortType.objects.get(name=port_type)
         except PortType.DoesNotExist:
             raise serializers.ValidationError('Port type doesnt exist')
 
-        try:
-            print(user)
-            # Port.objects.get()
-        except:
-            pass
+        ports = Port.objects.filter(type=type, user=user)
+
+        # initialize
+        ports_unoccupied = 0
+        for port in ports:
+            if DockChart.objects.filter(port=port, end_time=None).count() == 0:
+                ports_unoccupied += 1
+        if ports_unoccupied == 0:
+            raise serializers.ValidationError('All ports are busy')
 
         return attrs
 

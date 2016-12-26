@@ -24,6 +24,14 @@ class VersionModelAdmin(admin.ModelAdmin):
     list_display = ('platform', 'version', 'is_essential')
 
 
+class DockChartModelAdmin(admin.ModelAdmin):
+    list_display = ('ship', 'port', 'start_time', 'end_time', 'is_success')
+
+
+class PortModelAdmin(admin.ModelAdmin):
+    list_display = ('user', 'type', 'log')
+
+
 admin.site.register(ShipStore, ShipStoreModelAdmin)
 admin.site.register(Level, LevelModelAdmin)
 admin.site.register(ShipUpgrade, ShipUpgardeModelAdmin)
@@ -32,13 +40,8 @@ admin.site.register(Island)
 admin.site.register(Slot, SlotModelAdmin)
 admin.site.register(Version, VersionModelAdmin)
 
-
-class DockChartModelAdmin(admin.ModelAdmin):
-    list_display = ('ship', 'port', 'start_time', 'end_time', 'is_success')
-
-
 admin.site.register(Ship)
-admin.site.register(Port)
+admin.site.register(Port, PortModelAdmin)
 admin.site.register(PortType)
 admin.site.register(Dock)
 admin.site.register(DockChart, DockChartModelAdmin)
