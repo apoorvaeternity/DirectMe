@@ -89,7 +89,7 @@ class UserViewTests(APITestCase):
         self.assertEqual(response.data['first_name'], '')
         self.assertEqual(response.data['last_name'], '')
         self.assertEqual(response.data['experience'], 10)
-        self.assertEqual(len(response.data), 7)
+        self.assertEqual(len(response.data), 9)
 
     def test_update_user_details(self):
         """
