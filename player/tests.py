@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from core.models import Island
 from player.models import Profile
 
 
@@ -147,3 +148,59 @@ class UserPasswordUpdateViewTests(APITestCase):
         user.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['token'], user.auth_token.key)
+
+
+class GetSuggestionTests(APITestCase):
+    url = reverse('suggestions')
+
+    def test_island_exists(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        data = {'island_id': 100}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Island with the given ID doesn't exist")
+
+    def test_pirate_island(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        pirate_island = Island.objects.filter(name='Pirate Island').first()
+        data = {'island_id': pirate_island.id}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Given island is pirate island")
+
+    def test_vacant_users_available(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        data = {'island_id': Island.objects.get(name='Bamboo Island').id}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "No user exists for the given island")
+
+    def test_get_list(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        user2 = Profile.objects.create_player(username='some_username2', password='some_password',
+                                              email='some_email@gmail.com')
+
+        data = {'island_id': user2.profile.island.id}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data[0]), 4)
+        self.assertEqual(response.data[0]['user_id'], user2.id)
+        self.assertEqual(response.data[0]['parking'], 2)
+        self.assertEqual(response.data[0]['non-parking'], 3)
+        self.assertEqual(response.data[0]['name'], 'some_username2')

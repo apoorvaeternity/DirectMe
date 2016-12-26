@@ -108,7 +108,7 @@ class SuggestionListView(APIView):
 
     def response_format(self, result, user, parking_ports, non_parking_ports):
         result.append({
-            'name ': user.username,
+            'name': user.username,
             'user_id': user.id,
             'parking': parking_ports,
             'non-parking': non_parking_ports

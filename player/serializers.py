@@ -9,7 +9,6 @@ from .models import Profile
 class UserProfileSerializer(serializers.ModelSerializer):
     # todo to be added
     # avatar = serializers.ReadOnlyField(source='profile.avatar', read_only=True)
-    # user_id = serializers.ReadOnlyField(source='user.id', read_only=True)
     user_id = serializers.ReadOnlyField(source='id', read_only=True)
     island_name = serializers.ReadOnlyField(source='profile.island.name', read_only=True)
     island_id = serializers.ReadOnlyField(source='profile.island.id', read_only=True)
