@@ -2,9 +2,11 @@ from django.conf.urls import url
 
 from core.views import ShipsListView
 from .views import UserRegistrationView, UserAuthenticationView, UserView, GCMTokenView, UserPasswordUpdateView, \
-    SuggestionListView
+    SuggestionListView, UsernameSearchView, EmailSearchView
 
 urlpatterns = [
+    url(r'^search-username/(?P<username>\w+)/$', UsernameSearchView.as_view(), name='search-username'),
+    url(r'^search-email/(?P<email>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/$', EmailSearchView.as_view(), name='search-email'),
     url(r'^register/', UserRegistrationView.as_view(), name='register'),
     url(r'^gcm/', GCMTokenView.as_view(), name='gcm'),
     url(r'^login/', UserAuthenticationView.as_view(), name='login'),

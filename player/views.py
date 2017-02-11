@@ -7,9 +7,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import Port
+from django.contrib.auth.models import User
 from core.serializers import SuggestionListSerializer
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
-    UserPasswordSerializer, UserProfileSerializer
+    UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer
 
 
 class UserRegistrationView(APIView):
@@ -147,3 +148,33 @@ class SuggestionListView(APIView):
                     self.response_format(response, user, no_of_parking_ports, no_of_non_parking_ports)
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UsernameSearchView(APIView):
+    """
+    Check whether user exists using username and give some details
+    """
+    serializer_class = UserSearchSerializer
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, username, *args, **kwargs):
+        if User.objects.filter(username=username).exists():
+            serializer = self.serializer_class(User.objects.get(username=username))
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class EmailSearchView(APIView):
+    """
+    Check whether user exists using email and give some details
+    """
+    serializer_class = UserSearchSerializer
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, email, *args, **kwargs):
+        if User.objects.filter(email=email).exists():
+            serializer = self.serializer_class(User.objects.get(email=email))
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)

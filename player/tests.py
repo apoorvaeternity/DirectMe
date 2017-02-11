@@ -204,3 +204,39 @@ class GetSuggestionTests(APITestCase):
         self.assertEqual(response.data[0]['parking'], 2)
         self.assertEqual(response.data[0]['non-parking'], 3)
         self.assertEqual(response.data[0]['name'], 'some_username2')
+
+
+class EmailSearchTest(APITestCase):
+    url = None
+
+    def test_email_required(self):
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        self.url = reverse("search-email", kwargs={'email': user.email})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
+        self.assertEqual(response.data['username'], user.username)
+        self.assertEqual(response.data['email'], user.email)
+        self.assertEqual(response.data['first_name'], "")
+        self.assertEqual(response.data['last_name'], "")
+
+
+class UsernameSearchTest(APITestCase):
+    url = None
+
+    def test_username_required(self):
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                              email='some_email@gmail.com')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        self.url = reverse("search-username", kwargs={'username': user.username})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
+        self.assertEqual(response.data['username'], user.username)
+        self.assertEqual(response.data['email'], user.email)
+        self.assertEqual(response.data['first_name'], "")
+        self.assertEqual(response.data['last_name'], "")
