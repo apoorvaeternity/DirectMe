@@ -2,9 +2,9 @@ from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
+from django.test import TestCase
 from core.models import Island
-from player.models import Profile
+from player.models import Profile, EmailVerification
 
 
 def setUpModule():
@@ -230,7 +230,7 @@ class UsernameSearchTest(APITestCase):
     def test_username_required(self):
 
         user = Profile.objects.create_player(username='some_username', password='some_password',
-                                              email='some_email@gmail.com')
+                                             email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         self.url = reverse("search-username", kwargs={'username': user.username})
         response = self.client.get(self.url)
@@ -240,3 +240,35 @@ class UsernameSearchTest(APITestCase):
         self.assertEqual(response.data['email'], user.email)
         self.assertEqual(response.data['first_name'], "")
         self.assertEqual(response.data['last_name'], "")
+
+
+class EmailVerificationTest(TestCase):
+    url = None
+
+    def test_email_verification(self):
+
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        token = EmailVerification.objects.get(user=user).token
+        self.url = reverse("email-verification", kwargs={'get_token': token})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_email_expiry(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        token = EmailVerification.objects.get(user=user).token
+        self.url = reverse("email-verification", kwargs={'get_token': token})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invalid_link(self):
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        token = EmailVerification.objects.get(user=user).token
+        self.url = reverse("email-verification", kwargs={'get_token': token + "123"})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

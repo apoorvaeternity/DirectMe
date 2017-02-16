@@ -29,6 +29,12 @@ SECRET_KEY = '3__eu+zc19hdnok^+6a$dez25whb)r8z+_pvg%cmo#thna3nsh'
 DEBUG = True
 
 ALLOWED_HOSTS = ['direct-me.herokuapp.com', '127.0.0.1']
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 
 # Application definition
 

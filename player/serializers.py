@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
-
 from core.serializers import InventorySerializer
 from .models import Profile
 
@@ -31,6 +30,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'password')
 
     def create(self, validated_data):
+
         return Profile.objects.create_player(
             username=validated_data['username'],
             password=validated_data['password'],

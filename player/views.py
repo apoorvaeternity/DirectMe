@@ -1,16 +1,17 @@
 from random import randint
-
+from django.views import View
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from core.models import Port
 from django.contrib.auth.models import User
 from core.serializers import SuggestionListSerializer
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
     UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer
+from player.models import EmailVerification, EmailVerificationModelManager
+from django.http import HttpResponse
 
 
 class UserRegistrationView(APIView):
@@ -178,3 +179,14 @@ class EmailSearchView(APIView):
             serializer = self.serializer_class(User.objects.get(email=email))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+      
+class EmailVerificationView(View):
+    def get(self, request, get_token, *args, **kwargs):
+        if EmailVerification.objects.filter(token=get_token).exists():
+            query = EmailVerification.objects.get(token=get_token)
+            if query.verified:
+                return HttpResponse("This link has expired.", status=status.HTTP_400_BAD_REQUEST)
+            EmailVerificationModelManager.verify_token(token=get_token)
+            return HttpResponse("Thanks for verifying your email.", status=status.HTTP_200_OK)
+        return HttpResponse("Invalid verification link.", status=status.HTTP_400_BAD_REQUEST)
