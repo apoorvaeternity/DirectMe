@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework_docs',
     'player',
     'core',
+    'fcm_django'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -103,6 +104,10 @@ DATABASES = {
         # 'USER': 'shobhit',
         # 'PASSWORD': 'shobhit'
     }
+}
+
+FCM_DJANGO_SETTINGS = {
+        "FCM_SERVER_KEY": os.environ.get("FCM_SERVER_KEY")
 }
 
 if 'IS_HEROKU' in os.environ:
