@@ -63,13 +63,18 @@ class UserRegistrationTests(APITestCase):
 
 class UserAuthenticationTests(APITestCase):
     url = reverse('login')
-
+    email_verification_url=None
     def test_valid_user_auth(self):
         """
         Ensure we  get token in case of correct credentials
         """
         user = Profile.objects.create_player(username='some_username', password='some_password',
                                              email='some_email@gmail.com')
+        token = EmailVerification.objects.get(user=user).token
+        self.email_verification_url = reverse("email-verification", kwargs={'get_token': token})
+        response = self.client.get(self.email_verification_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = {'username': 'some_username', 'password': 'some_password'}
         response = self.client.post(self.url, data)
 
@@ -83,6 +88,18 @@ class UserAuthenticationTests(APITestCase):
         user = Profile.objects.create_player(username='some_username', password='some_password',
                                              email='some_email@gmail.com')
         data = {'username': 'some_username', 'password': 'wrong_password'}
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual('token' in response.data, False)
+
+    def test_email_verified(self):
+        """
+        Ensure we do not get token in case email is not verified
+        """
+        user = Profile.objects.create_player(username='some_username', password='some_password',
+                                             email='some_email@gmail.com')
+        data = {'username': 'some_username', 'password': 'some_password'}
         response = self.client.post(self.url, data)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -150,7 +167,7 @@ class GCMTokenViewTests(APITestCase):
 
 class UserPasswordUpdateViewTests(APITestCase):
     url = reverse('reset-password')
-
+    email_verification_url = None
     def test_update_passowrd(self):
         user = Profile.objects.create_player(username='some_username', password='some_password',
                                              email='some_email@gmail.com')
@@ -159,6 +176,11 @@ class UserPasswordUpdateViewTests(APITestCase):
         data = {'password': 'a_new_password'}
         response = self.client.post(self.url, data)
 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        token = EmailVerification.objects.get(user=user).token
+        self.email_verification_url = reverse("email-verification", kwargs={'get_token': token})
+        response = self.client.get(self.email_verification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = {'username': 'some_username', 'password': 'a_new_password'}

@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from core.serializers import InventorySerializer
-from .models import Profile
+from .models import Profile, EmailVerification
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -57,9 +57,13 @@ class UserAuthenticationSerializer(serializers.Serializer):
         if username and password:
             user = authenticate(username=username, password=password)
             if user:
+                if EmailVerification.objects.get(user=user).verified:
 
-                if not user.is_active:
-                    msg = 'User account is disabled.'
+                    if not user.is_active:
+                        msg = 'User account is disabled.'
+                        raise serializers.ValidationError(msg, code='authorization')
+                else:
+                    msg="User email is not verified."
                     raise serializers.ValidationError(msg, code='authorization')
 
             else:
