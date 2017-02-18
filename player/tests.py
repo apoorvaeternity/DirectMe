@@ -42,6 +42,24 @@ class UserRegistrationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Profile.objects.count(), 0)
 
+    def test_unique_email(self):
+        """
+        Register the first user
+        """
+
+        data = {'username': 'some_username', 'email': 'some_email@gmail.com', 'password': 'some_password'}
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Profile.objects.count(), 1)
+        self.assertEqual(Profile.objects.get().user.username, 'some_username')
+
+        data = {'username': 'some_other_username', 'email': 'some_email@gmail.com', 'password': 'some_password'}
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['email'][0], "A user with that email already exists.")
+
 
 class UserAuthenticationTests(APITestCase):
     url = reverse('login')

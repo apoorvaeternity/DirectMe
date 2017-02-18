@@ -29,6 +29,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'password')
 
+    def validate_email(self, email):
+        """
+        Check that the email of user is unique.
+        """
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("A user with that email already exists.")
+        return email
+
     def create(self, validated_data):
 
         return Profile.objects.create_player(
