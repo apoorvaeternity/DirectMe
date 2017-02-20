@@ -20,6 +20,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user/', include('player.urls')),
     url(r'^core/', include('core.urls')),
-    url(r'', include('rest_framework_docs.urls')),
-
+    url(r'^docs/', include('rest_framework_docs.urls')),
+    url('', include('social_django.urls', namespace='social'))
 ]

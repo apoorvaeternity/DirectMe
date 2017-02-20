@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_docs',
     'player',
     'core',
+    'social_django',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -151,3 +152,12 @@ if 'IS_HEROKU' in os.environ:
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 STATIC_URL = '/static/'
+
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
