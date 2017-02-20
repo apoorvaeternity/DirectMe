@@ -23,25 +23,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # TODO: Remove this
-SECRET_KEY = '3__eu+zc19hdnok^+6a$dez25whb)r8z+_pvg%cmo#thna3nsh'
+SECRET_KEY = "3__eu+zc19hdnok^+6a$dez25whb)r8z+_pvg%cmo#thna3nsh"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['direct-me.herokuapp.com', '127.0.0.1']
-EMAIL_HOST = ''
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-if 'IS_HEROKU' in os.environ:
-    EMAIL_HOST = os.environ.get('EMAIL_HOST')
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    EMAIL_PORT = os.environ.get('EMAIL_PORT')
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
-
 
 # Application definition
 
@@ -105,6 +92,12 @@ DATABASES = {
         # 'PASSWORD': 'shobhit'
     }
 }
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
 
 FCM_DJANGO_SETTINGS = {
         "FCM_SERVER_KEY": os.environ.get("FCM_SERVER_KEY")

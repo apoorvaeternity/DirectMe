@@ -53,7 +53,7 @@ class Profile(models.Model):
     avatar = models.ImageField(default=None, null=True)
     experience = models.IntegerField(default=10)
     island = models.ForeignKey(Island, default=None, null=True)
-    gcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
+    fcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
     objects = ProfileModelManager()
 
     def save(self, force_insert=False, force_update=False, using=None,

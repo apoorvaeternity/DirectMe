@@ -78,10 +78,10 @@ class UserAuthenticationSerializer(serializers.Serializer):
         return attrs
 
 
-class UserGcmSerializer(serializers.ModelSerializer):
+class UserFcmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('gcm_token',)
+        fields = ('fcm_token',)
 
 
 class UserPasswordSerializer(serializers.Serializer):

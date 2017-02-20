@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from core.models import Port
 from django.contrib.auth.models import User
 from core.serializers import SuggestionListSerializer
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserFcmSerializer, \
     UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer
 from player.models import EmailVerification, EmailVerificationModelManager
 from django.http import HttpResponse
@@ -65,13 +65,13 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GCMTokenView(APIView):
+class FCMTokenView(APIView):
     """
-    Register and update gcm token
+    Register and update fcm token
     """
     authentication_classes = (SessionAuthentication, TokenAuthentication)
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserGcmSerializer
+    serializer_class = UserFcmSerializer
 
     def post(self, request):
         serializer = self.serializer_class(request.user.profile, data=request.data, partial=True)
