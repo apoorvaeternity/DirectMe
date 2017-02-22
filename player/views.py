@@ -1,43 +1,25 @@
 from random import randint
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.views import View
+from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from core.models import Port
-from django.contrib.auth.models import User
-from core.serializers import SuggestionListSerializer
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
-    UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer
-from player.models import EmailVerification, EmailVerificationModelManager
-from django.http import HttpResponse
-
-
-
-#############
-from django.conf import settings
-
-from rest_framework import serializers
-from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
-from requests.exceptions import HTTPError
-
+from rest_framework.views import APIView
 from social_django.utils import psa
 
+from core.models import Port
+from core.serializers import SuggestionListSerializer
+from player.models import EmailVerification, EmailVerificationModelManager
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
+    UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer, SocialSerializer
 
-class SocialSerializer(serializers.Serializer):
-    """
-    Serializer which accepts an OAuth2 access token.
-    """
-    access_token = serializers.CharField(
-        allow_blank=False,
-        trim_whitespace=True,
-    )
 
 
 @api_view(http_method_names=['POST'])
@@ -110,7 +92,7 @@ def exchange_token(request, backend):
                 {'errors': {nfe: "Authentication Failed"}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-#############
+
 
 class UserRegistrationView(APIView):
     """
@@ -278,7 +260,7 @@ class EmailSearchView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-      
+
 class EmailVerificationView(View):
     def get(self, request, get_token, *args, **kwargs):
         if EmailVerification.objects.filter(token=get_token).exists():

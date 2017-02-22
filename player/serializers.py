@@ -1,8 +1,19 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
+
 from core.serializers import InventorySerializer
 from .models import Profile, EmailVerification
+
+
+class SocialSerializer(serializers.Serializer):
+    """
+    Serializer which accepts an OAuth2 access token.
+    """
+    access_token = serializers.CharField(
+        allow_blank=False,
+        trim_whitespace=True,
+    )
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -38,7 +49,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return email
 
     def create(self, validated_data):
-
         return Profile.objects.create_player(
             username=validated_data['username'],
             password=validated_data['password'],
@@ -63,7 +73,7 @@ class UserAuthenticationSerializer(serializers.Serializer):
                         msg = 'User account is disabled.'
                         raise serializers.ValidationError(msg, code='authorization')
                 else:
-                    msg="User email is not verified."
+                    msg = "User email is not verified."
                     raise serializers.ValidationError(msg, code='authorization')
 
             else:
