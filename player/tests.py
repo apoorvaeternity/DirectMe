@@ -12,6 +12,15 @@ def setUpModule():
     call_command('loaddata', 'db.json', verbosity=0)
 
 
+class GoogleLoginTests(APITestCase):
+    url = reverse('google-login', kwargs={'backend':'google-oauth2'})
+
+    def test_invalid_token(self):
+        data = {'access_token': 'false_token'}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class UserRegistrationTests(APITestCase):
     url = reverse('register')
 
