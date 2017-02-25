@@ -17,15 +17,13 @@ from core.models import Item, ShipStore
 class ProfileModelManager(models.Manager):
 
     def create_player(self, username, password, email):
-        user = User.objects.create_user(
+        user = User.objects.get(
             username=username,
             password=password,
             email=email
         )
 
         Profile.objects.create(user=user)
-
-        Token.objects.create(user=user)
 
         Inventory.objects.create_initial_inventory(user=user)
 
@@ -34,8 +32,6 @@ class ProfileModelManager(models.Manager):
         Dock.objects.create_initial_docks(user=user)
 
         ShipStore.objects.allocate_initial_ship(user=user)
-
-        EmailVerificationModelManager.create_verification_link(user=user)
 
         return user
 

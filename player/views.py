@@ -16,7 +16,7 @@ from social_django.utils import psa
 
 from core.models import Port
 from core.serializers import SuggestionListSerializer
-from player.models import EmailVerification, EmailVerificationModelManager
+from player.models import EmailVerification, EmailVerificationModelManager, Profile
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
     UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer, SocialSerializer
 
@@ -74,6 +74,9 @@ def exchange_token(request, backend):
         if user:
             if user.is_active:
                 token, _ = Token.objects.get_or_create(user=user)
+                if not Profile.objects.filter(user=user).exists():
+                    user = User.objects.get(username=user)
+                    Profile.objects.create_player(username=user.username, email=user.email, password=user.password)
                 return Response({'token': token.key})
             else:
                 # user is not active; at some point they deleted their account,
