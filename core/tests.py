@@ -2,7 +2,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
+from django.contrib.auth.models import User
 from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart
 from player.models import Profile, Inventory
 
@@ -18,8 +18,10 @@ class DockPirateIslandTests(APITestCase):
     def test_invalid_ship(self):
         """Ensure the ship is incorrect"""
 
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
 
         ship_id = 90
         data = {'ship_id': ship_id}
@@ -31,9 +33,10 @@ class DockPirateIslandTests(APITestCase):
 
     def test_ship_active(self):
         """Ensure if ship is active"""
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         ship = Ship.objects.get(user=user)
         ship.is_active = False
         ship.save()
@@ -47,8 +50,10 @@ class DockPirateIslandTests(APITestCase):
     def test_ship_idle(self):
         """Ensure the ship is idle"""
 
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
@@ -66,8 +71,10 @@ class DockPirateIslandTests(APITestCase):
 
     def test_pirate_port_exists(self):
         """Ensure pirate ports exists"""
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         ship = Ship.objects.get(user=user)
@@ -83,8 +90,10 @@ class DockPirateIslandTests(APITestCase):
     def test_pirate_port_idle(self):
         """Ensure that atleast one pirate port is idle"""
 
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
@@ -105,8 +114,10 @@ class DockPirateIslandTests(APITestCase):
         """Ensure user can dock ship"""
         """Ensure that atleast one pirate port is idle"""
 
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
@@ -128,8 +139,10 @@ class UpdateShipTests(APITestCase):
     def test_ship_exists(self):
         """Ensure that ship exists"""
 
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         ship_id = 100
@@ -144,8 +157,10 @@ class UpdateShipTests(APITestCase):
     def test_ship_idle(self):
         """Ensure that ship exists"""
 
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         ship = Ship.objects.get(user=user)
@@ -164,9 +179,10 @@ class BuyShipTests(APITestCase):
     url = reverse('buy-ship')
 
     def test_incorrect_dock_id(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         docks = Dock.objects.filter(user=user)
         # Create incorrect dock_id
         dock_id = 0
@@ -181,9 +197,10 @@ class BuyShipTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Incorrect Dock ID")
 
     def test_lock_docked(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         dock = Dock.objects.filter(user=user, ship=None).first()
 
         data = {'dock_id': dock.id}
@@ -194,9 +211,10 @@ class BuyShipTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Dock is not unlocked")
 
     def test_dock_already_occupied(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         dock = Dock.objects.filter(user=user).exclude(ship=None).first()
 
         data = {'dock_id': dock.id}
@@ -207,9 +225,10 @@ class BuyShipTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Dock is already occupied")
 
     def test_insufficient_gold(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         dock = Dock.objects.filter(user=user, ship=None).first()
 
         # Increment players experience
@@ -227,9 +246,10 @@ class BuyShipTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "User doesn't have sufficient Gold")
 
     def test_buy(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username', password=user.password,
+                                      email='some_email@gmail.com')
         dock = Dock.objects.filter(user=user, ship=None).first()
 
         # Increment player's experience
