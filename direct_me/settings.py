@@ -44,11 +44,13 @@ INSTALLED_APPS = [
     'rest_framework_docs',
     'player',
     'core',
+    'corsheaders',
 ]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -87,8 +89,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'direct_me',
         'ATOMIC_REQUESTS': True,
-        # 'USER': 'shobhit',
-        # 'PASSWORD': 'shobhit'
     }
 }
 
@@ -151,3 +151,5 @@ if 'IS_HEROKU' in os.environ:
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 STATIC_URL = '/static/'
+
+CORS_ORIGIN_ALLOW_ALL = True
