@@ -1,7 +1,4 @@
-from uuid import uuid4
 from random import randint
-from django.core.mail import send_mail
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from rest_framework.authtoken.models import Token
@@ -16,14 +13,14 @@ from core.models import Item, ShipStore
 
 class ProfileModelManager(models.Manager):
 
-    def create_player(self, username, password, email):
+    def create_player(self, username):
         user = User.objects.get(
-            username=username,
-            password=password,
-            email=email
+            username=username
         )
 
         Profile.objects.create(user=user)
+
+        Token.objects.create(user=user)
 
         Inventory.objects.create_initial_inventory(user=user)
 
@@ -104,28 +101,3 @@ class Inventory(models.Model):
 
     def __str__(self):
         return self.user.username + " : " + self.item.name + " : " + str(self.count)
-
-
-class EmailVerificationModelManager(models.Manager):
-    def create_verification_link(user):
-        token = str(uuid4())
-        email = user.email
-        verification_link = "https://direct-me.herokuapp.com/user/email-verification/" + token + "/"
-        send_mail("Verification Link", "Verify your email.",
-                  settings.EMAIL_HOST_USER, [email],
-                  fail_silently=False, html_message="<a href=" + verification_link + ">\
-                  Click here to verify your account for DirectMe.</a>")
-        quer = EmailVerification(token=token, email=email, user=user)
-        quer.save()
-
-    def verify_token(token):
-        query = EmailVerification.objects.get(token=token)
-        query.verified = True
-        query.save()
-
-
-class EmailVerification(models.Model):
-    user = models.ForeignKey(User, default=None)
-    email = models.EmailField()
-    token = models.CharField(max_length=50)
-    verified = models.BooleanField(default=False)

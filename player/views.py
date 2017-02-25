@@ -2,12 +2,9 @@ from random import randint
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.http import HttpResponse
-from django.views import View
 from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -16,10 +13,9 @@ from social_django.utils import psa
 
 from core.models import Port
 from core.serializers import SuggestionListSerializer
-from player.models import EmailVerification, EmailVerificationModelManager, Profile
+from player.models import Profile
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
     UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer, SocialSerializer
-
 
 
 @api_view(http_method_names=['POST'])
@@ -73,11 +69,10 @@ def exchange_token(request, backend):
 
         if user:
             if user.is_active:
-                token, _ = Token.objects.get_or_create(user=user)
                 if not Profile.objects.filter(user=user).exists():
                     user = User.objects.get(username=user)
-                    Profile.objects.create_player(username=user.username, email=user.email, password=user.password)
-                return Response({'token': token.key})
+                    Profile.objects.create_player(username=user.username)
+                return Response({'token': user.auth_token.key})
             else:
                 # user is not active; at some point they deleted their account,
                 # or were banned by a superuser. They can't just log in with their
@@ -262,14 +257,3 @@ class EmailSearchView(APIView):
             serializer = self.serializer_class(User.objects.get(email=email))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-class EmailVerificationView(View):
-    def get(self, request, get_token, *args, **kwargs):
-        if EmailVerification.objects.filter(token=get_token).exists():
-            query = EmailVerification.objects.get(token=get_token)
-            if query.verified:
-                return HttpResponse("This link has expired.", status=status.HTTP_400_BAD_REQUEST)
-            EmailVerificationModelManager.verify_token(token=get_token)
-            return HttpResponse("Thanks for verifying your email.", status=status.HTTP_200_OK)
-        return HttpResponse("Invalid verification link.", status=status.HTTP_400_BAD_REQUEST)

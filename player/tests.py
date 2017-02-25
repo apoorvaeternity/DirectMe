@@ -1,10 +1,11 @@
+from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.test import TestCase
+
 from core.models import Island
-from player.models import Profile, EmailVerification
+from player.models import Profile
 
 
 def setUpModule():
@@ -13,7 +14,7 @@ def setUpModule():
 
 
 class GoogleLoginTests(APITestCase):
-    url = reverse('google-login', kwargs={'backend':'google-oauth2'})
+    url = reverse('google-login', kwargs={'backend': 'google-oauth2'})
 
     def test_invalid_token(self):
         data = {'access_token': 'false_token'}
@@ -63,7 +64,8 @@ class UserRegistrationTests(APITestCase):
         self.assertEqual(Profile.objects.count(), 1)
         self.assertEqual(Profile.objects.get().user.username, 'some_username')
 
-        data = {'username': 'some_other_username', 'email': 'some_email@gmail.com', 'password': 'some_password'}
+        data = {'username': 'some_other_username', 'email': 'some_email@gmail.com',
+                'password': 'some_password'}
 
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -77,12 +79,9 @@ class UserAuthenticationTests(APITestCase):
         """
         Ensure we  get token in case of correct credentials
         """
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-        token = EmailVerification.objects.get(user=user).token
-        email_verification_url = reverse("email-verification", kwargs={'get_token': token})
-        response = self.client.get(email_verification_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
 
         data = {'username': 'some_username', 'password': 'some_password'}
         response = self.client.post(self.url, data)
@@ -94,21 +93,10 @@ class UserAuthenticationTests(APITestCase):
         """
         Ensure we do not get token in case of wrong credentials
         """
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         data = {'username': 'some_username', 'password': 'wrong_password'}
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual('token' in response.data, False)
-
-    def test_email_verified(self):
-        """
-        Ensure we do not get token in case email is not verified
-        """
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-        data = {'username': 'some_username', 'password': 'some_password'}
         response = self.client.post(self.url, data)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -122,8 +110,9 @@ class UserViewTests(APITestCase):
         """
         Ensure the user is setup properly and no unwanted details are revealed
         """
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         response = self.client.get(self.url)
@@ -140,8 +129,9 @@ class UserViewTests(APITestCase):
         """
         Ensure that the change in the fields are saved
         """
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         data = {'first_name': 'Jon'}
@@ -162,8 +152,9 @@ class GCMTokenViewTests(APITestCase):
         """
         Ensure that the change in the GCM token are saved
         """
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         data = {'gcm_token': 'some_dragon_token_maybe'}
@@ -178,18 +169,14 @@ class UserPasswordUpdateViewTests(APITestCase):
     url = reverse('reset-password')
 
     def test_update_passowrd(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         data = {'password': 'a_new_password'}
         response = self.client.post(self.url, data)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        token = EmailVerification.objects.get(user=user).token
-        email_verification_url = reverse("email-verification", kwargs={'get_token': token})
-        response = self.client.get(email_verification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = {'username': 'some_username', 'password': 'a_new_password'}
@@ -203,8 +190,9 @@ class GetSuggestionTests(APITestCase):
     url = reverse('suggestions')
 
     def test_island_exists(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         data = {'island_id': 100}
         response = self.client.post(self.url, data)
@@ -213,8 +201,9 @@ class GetSuggestionTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Island with the given ID doesn't exist")
 
     def test_pirate_island(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         pirate_island = Island.objects.filter(name='Pirate Island').first()
@@ -225,8 +214,9 @@ class GetSuggestionTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Given island is pirate island")
 
     def test_vacant_users_available(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
         data = {'island_id': Island.objects.get(name='Bamboo Island').id}
@@ -236,12 +226,14 @@ class GetSuggestionTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "No user exists for the given island")
 
     def test_get_list(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
-        user2 = Profile.objects.create_player(username='some_username2', password='some_password',
-                                              email='some_email@gmail.com')
+        user2 = User.objects.create_user(username='some_username2', password='some_password',
+                                         email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username2')
 
         data = {'island_id': user2.profile.island.id}
         response = self.client.post(self.url, data)
@@ -259,9 +251,9 @@ class EmailSearchTest(APITestCase):
     url = None
 
     def test_email_required(self):
-
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         self.url = reverse("search-email", kwargs={'email': user.email})
         response = self.client.get(self.url)
@@ -277,9 +269,9 @@ class UsernameSearchTest(APITestCase):
     url = None
 
     def test_username_required(self):
-
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         self.url = reverse("search-username", kwargs={'username': user.username})
         response = self.client.get(self.url)
@@ -289,35 +281,3 @@ class UsernameSearchTest(APITestCase):
         self.assertEqual(response.data['email'], user.email)
         self.assertEqual(response.data['first_name'], "")
         self.assertEqual(response.data['last_name'], "")
-
-
-class EmailVerificationTest(TestCase):
-    url = None
-
-    def test_email_verification(self):
-
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-        token = EmailVerification.objects.get(user=user).token
-        self.url = reverse("email-verification", kwargs={'get_token': token})
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_email_expiry(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-        token = EmailVerification.objects.get(user=user).token
-        self.url = reverse("email-verification", kwargs={'get_token': token})
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_invalid_link(self):
-        user = Profile.objects.create_player(username='some_username', password='some_password',
-                                             email='some_email@gmail.com')
-        token = EmailVerification.objects.get(user=user).token
-        self.url = reverse("email-verification", kwargs={'get_token': token + "123"})
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from core.serializers import InventorySerializer
-from .models import Profile, EmailVerification
+from .models import Profile
 
 
 class SocialSerializer(serializers.Serializer):
@@ -49,11 +49,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return email
 
     def create(self, validated_data):
-        return Profile.objects.create_player(
-            username=validated_data['username'],
-            password=validated_data['password'],
-            email=validated_data['email']
-        )
+        user = User.objects.create_user(username=validated_data['username'],
+                                        password=validated_data['password'],
+                                        email=validated_data['email'])
+        user.save()
+        return Profile.objects.create_player(username=validated_data['username'])
 
 
 class UserAuthenticationSerializer(serializers.Serializer):
@@ -67,14 +67,9 @@ class UserAuthenticationSerializer(serializers.Serializer):
         if username and password:
             user = authenticate(username=username, password=password)
             if user:
-                if EmailVerification.objects.get(user=user).verified:
-
-                    if not user.is_active:
+                if not user.is_active:
                         msg = 'User account is disabled.'
                         raise serializers.ValidationError(msg, code='authorization')
-                else:
-                    msg = "User email is not verified."
-                    raise serializers.ValidationError(msg, code='authorization')
 
             else:
                 msg = 'Unable to log in with provided credentials.'
