@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,7 +16,7 @@ class BuyShipView(APIView):
     Buy a new ship
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = BuyShipSerializer
 
@@ -33,7 +33,7 @@ class DocksListView(APIView):
     Retrieves docks for the user.
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = DocksListSerializer
 
@@ -48,7 +48,7 @@ class DockShipView(APIView):
     Dock Ship on someone else's port
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = DockShipSerializer
 
@@ -65,7 +65,7 @@ class PortsListView(APIView):
     Retrieve all ports for a user and show if any ship is docked on them or not.
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = PortsListSerializer
 
@@ -80,7 +80,7 @@ class ShipsListView(APIView):
     Retrieves all active ships of a user.
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ShipsListSerializer
 
@@ -94,7 +94,7 @@ class ShipsList(APIView):
     """
     Lists all ships along with complete details from the store.
     """
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ShipStoreSerializer
 
@@ -108,7 +108,7 @@ class ShipsDetail(APIView):
     """
         Retrieves details of a ship along with complete details from the store.
     """
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = ShipStoreSerializer
 
@@ -134,7 +134,7 @@ class FineView(APIView):
     """
     Fine a ship on your non-parking port
     """
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = FineSerializer
 
@@ -151,7 +151,7 @@ class UndockShipView(APIView):
     Undock Ship from someone else's port
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = UndockSerializer
 
@@ -168,7 +168,7 @@ class UpdateShipView(APIView):
     Update user's ship
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = UpdateShipSerializer
 
@@ -185,7 +185,7 @@ class DockPirateIsland(APIView):
     Dock a ship at pirate island
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = DockPirateIslandSerializer
 
