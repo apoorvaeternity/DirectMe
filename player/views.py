@@ -14,8 +14,7 @@ from social_django.utils import psa
 from core.models import Port
 from core.serializers import SuggestionListSerializer
 from player.models import Profile
-from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserGcmSerializer, \
-    UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer, SocialSerializer
+from player.serializers import SocialSerializer
 
 
 @api_view(http_method_names=['POST'])
@@ -92,6 +91,10 @@ def exchange_token(request, backend):
             )
 
 
+from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserFcmSerializer, \
+    UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer
+
+
 class UserRegistrationView(APIView):
     """
     Register a new user
@@ -143,13 +146,13 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GCMTokenView(APIView):
+class FCMTokenView(APIView):
     """
-    Register and update gcm token
+    Register and update fcm token
     """
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserGcmSerializer
+    serializer_class = UserFcmSerializer
 
     def post(self, request):
         serializer = self.serializer_class(request.user.profile, data=request.data, partial=True)

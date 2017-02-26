@@ -28,7 +28,7 @@ SECRET_KEY = '3__eu+zc19hdnok^+6a$dez25whb)r8z+_pvg%cmo#thna3nsh'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['direct-me.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['direct-me.herokuapp.com', '127.0.0.1', '*']
 
 # Application definition
 
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'core',
     'corsheaders',
     'social_django',
+    'fcm_django'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -98,6 +99,10 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
+
+FCM_DJANGO_SETTINGS = {
+        "FCM_SERVER_KEY": os.environ.get("FCM_SERVER_KEY")
+}
 
 if 'IS_HEROKU' in os.environ:
     db_from_env = dj_database_url.config(conn_max_age=500)

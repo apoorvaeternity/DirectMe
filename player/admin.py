@@ -11,7 +11,7 @@ admin.site.register(Inventory, InventoryModelAdmin)
 
 
 class ProfileModelAdmin(admin.ModelAdmin):
-    list_display = ('user', 'experience', 'island', 'gcm_token')
+    list_display = ('user', 'experience', 'island', 'fcm_token')
 
 
 admin.site.register(Profile, ProfileModelAdmin)

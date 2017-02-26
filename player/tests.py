@@ -145,24 +145,24 @@ class UserViewTests(APITestCase):
         self.assertEqual(user.first_name, 'Jon')
 
 
-class GCMTokenViewTests(APITestCase):
-    url = reverse('gcm')
+class FCMTokenViewTests(APITestCase):
+    url = reverse('fcm')
 
-    def test_update_gcm_token(self):
+    def test_update_fcm_token(self):
         """
-        Ensure that the change in the GCM token are saved
+        Ensure that the change in the FCM token are saved
         """
         user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
-        data = {'gcm_token': 'some_dragon_token_maybe'}
+        data = {'fcm_token': 'some_dragon_token_maybe'}
         response = self.client.post(self.url, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         user.profile.refresh_from_db()
-        self.assertEqual(user.profile.gcm_token, 'some_dragon_token_maybe')
+        self.assertEqual(user.profile.fcm_token, 'some_dragon_token_maybe')
 
 
 class UserPasswordUpdateViewTests(APITestCase):

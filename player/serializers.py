@@ -68,8 +68,8 @@ class UserAuthenticationSerializer(serializers.Serializer):
             user = authenticate(username=username, password=password)
             if user:
                 if not user.is_active:
-                        msg = 'User account is disabled.'
-                        raise serializers.ValidationError(msg, code='authorization')
+                    msg = 'User account is disabled.'
+                    raise serializers.ValidationError(msg, code='authorization')
 
             else:
                 msg = 'Unable to log in with provided credentials.'
@@ -83,10 +83,10 @@ class UserAuthenticationSerializer(serializers.Serializer):
         return attrs
 
 
-class UserGcmSerializer(serializers.ModelSerializer):
+class UserFcmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('gcm_token',)
+        fields = ('fcm_token',)
 
 
 class UserPasswordSerializer(serializers.Serializer):

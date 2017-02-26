@@ -15,3 +15,5 @@ whitenoise==3.2.2
 django-cors-headers==2.0.2
 social-auth-app-django==1.1.0
 social-auth-core==1.2.0
+
+fcm-django==0.2.6
