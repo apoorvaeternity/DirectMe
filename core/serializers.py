@@ -199,7 +199,7 @@ class FineSerializer(serializers.Serializer):
 class DockShipSerializer(serializers.Serializer):
     ship_id = serializers.IntegerField()
     port_owner_id = serializers.IntegerField()
-    port_type = serializers.CharField()
+    port_id = serializers.IntegerField()
 
     def validate(self, attrs):
         ship_id = attrs['ship_id']
@@ -214,23 +214,22 @@ class DockShipSerializer(serializers.Serializer):
         try:
             user = User.objects.get(pk=port_owner_id)
         except User.DoesNotExist:
-            raise serializers.ValidationError('Port owner ID doesnt exist')
+            raise serializers.ValidationError('Port owner ID doesnt exist.')
 
-        port_type = attrs['port_type']
+        port_id = attrs['port_id']
         try:
-            type = PortType.objects.get(name=port_type)
-        except PortType.DoesNotExist:
-            raise serializers.ValidationError('Port type doesnt exist')
+            port_id = Port.objects.get(id=port_id).id
+        except Port.DoesNotExist:
+            raise serializers.ValidationError('Port does not exist.')
 
-        ports = Port.objects.filter(type=type, user=user)
+        port = Port.objects.filter(id=port_id, user=user)
 
         # initialize
-        ports_unoccupied = 0
-        for port in ports:
-            if DockChart.objects.filter(port=port, end_time=None).count() == 0:
-                ports_unoccupied += 1
-        if ports_unoccupied == 0:
-            raise serializers.ValidationError('All ports are busy')
+        port_unoccupied = False
+        if DockChart.objects.filter(port=port, end_time=None).count() == 0:
+                port_unoccupied = True
+        if not port_unoccupied:
+            raise serializers.ValidationError('Port is busy.')
 
         return attrs
 
@@ -238,7 +237,7 @@ class DockShipSerializer(serializers.Serializer):
         DockChart.objects.create_entry(
             self.validated_data['ship_id'],
             self.validated_data['port_owner_id'],
-            self.validated_data['port_type']
+            self.validated_data['port_id']
         )
 
 
