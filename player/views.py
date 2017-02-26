@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from requests.exceptions import HTTPError
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -127,7 +127,7 @@ class UserView(APIView):
     Get all user details
     """
 
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = UserProfileSerializer
 
@@ -147,7 +147,7 @@ class GCMTokenView(APIView):
     """
     Register and update gcm token
     """
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = UserGcmSerializer
 
@@ -163,7 +163,7 @@ class UserPasswordUpdateView(APIView):
     """
     Update user's password
     """
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = UserPasswordSerializer
 
@@ -181,7 +181,7 @@ class SuggestionListView(APIView):
     """
     Get suggestions
     """
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     serializer_class = SuggestionListSerializer
@@ -234,7 +234,7 @@ class UsernameSearchView(APIView):
     Check whether user exists using username and give some details
     """
     serializer_class = UserSearchSerializer
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, username, *args, **kwargs):
@@ -249,7 +249,7 @@ class EmailSearchView(APIView):
     Check whether user exists using email and give some details
     """
     serializer_class = UserSearchSerializer
-    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, email, *args, **kwargs):
