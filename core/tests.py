@@ -167,6 +167,65 @@ class UpdateShipTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['non_field_errors'][0], "Ship is not idle")
 
+    def test_ship_belongs_user(self):
+        """Ensure that the ship belongs to user"""
+
+        # User 1
+        user = User.objects._create_user(username='some_username', password='some_password',
+                                         email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        ship = Ship.objects.get(user=user)
+
+        # User 2
+        user2 = User.objects._create_user(username='some_username2', password='some_password',
+                                          email='some_email2@gmail.com')
+        Profile.objects.create_player(username='some_username2')
+
+        data = {'ship_id': ship.id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Incorrect ship ID")
+
+    def test_ship_active(self):
+        """Ensure that the ship is active"""
+
+        user = User.objects._create_user(username='some_username', password='some_password',
+                                         email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        ship = Ship.objects.get(user=user)
+
+        data = {'ship_id': ship.id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Incorrect ship ID")
+
+    def test_update_ship(self):
+        """Ensure that the sufficient items are present for updating ship"""
+
+        user = User.objects._create_user(username='some_username', password='some_password',
+                                         email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        ship_id = Ship.objects.get(user=user).id
+
+        data = {'ship_id': ship_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.post(self.url, data)
+
+        ship = Ship.objects.get(id=ship_id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ship.is_active, False)
+
+        ship = Ship.objects.get(user=user, is_active=True)
+        self.assertNotEqual(ship.id, ship_id)
+
 
 class BuyShipTests(APITestCase):
     url = reverse('buy-ship')
@@ -265,24 +324,25 @@ class BuyShipTests(APITestCase):
         self.assertEqual(dock.ship != None, True)
         self.assertEqual(user_gold.count, 0)
 
+
 class DockShipTest(APITestCase):
     url = reverse('dock-ship')
 
     def test_dock(self):
         # Test whether ships can be docked on other ports
         user = User.objects.create_user(username='some_username', password='some_password',
-                                    email='some_email@gmail.com')
+                                        email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
 
         user2 = User.objects.create_user(username='some_username2', password='some_password',
-                                        email='some_email2@gmail.com')
+                                         email='some_email2@gmail.com')
         Profile.objects.create_player(username='some_username2')
-        ship_id=Ship.objects.get(user=user2).id
-        port_owner_id=Port.objects.filter(user=user).first().user_id
-        port_id=Port.objects.filter(user=user).first().id
+        ship_id = Ship.objects.get(user=user2).id
+        port_owner_id = Port.objects.filter(user=user).first().user_id
+        port_id = Port.objects.filter(user=user).first().id
 
         # Parking user2's raft on user's port
-        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id':port_id}
+        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id': port_id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -290,18 +350,18 @@ class DockShipTest(APITestCase):
     def test_wrong_port(self):
         # Test wrong port
         user = User.objects.create_user(username='some_username', password='some_password',
-                                    email='some_email@gmail.com')
+                                        email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
 
         user2 = User.objects.create_user(username='some_username2', password='some_password',
-                                        email='some_email2@gmail.com')
+                                         email='some_email2@gmail.com')
         Profile.objects.create_player(username='some_username2')
-        ship_id=Ship.objects.get(user=user2).id
-        port_owner_id=Port.objects.filter(user=user).first().user_id
-        port_id=Port.objects.filter(user=user).first().id
+        ship_id = Ship.objects.get(user=user2).id
+        port_owner_id = Port.objects.filter(user=user).first().user_id
+        port_id = Port.objects.filter(user=user).first().id
 
         # Parking user2's raft on user's port
-        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id':80}
+        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id': 80}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
