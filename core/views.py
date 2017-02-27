@@ -69,8 +69,8 @@ class PortsListView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PortsListSerializer
 
-    def get(self, request):
-        ports = get_list_or_404(Port, user_id=request.user.id)
+    def get(self, request, user_id):
+        ports = get_list_or_404(Port, user_id=user_id)
         serializer = self.serializer_class(ports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
