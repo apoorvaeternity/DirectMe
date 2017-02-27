@@ -14,7 +14,7 @@ def setUpModule():
 
 
 class GoogleLoginTests(APITestCase):
-    url = reverse('google-login', kwargs={'backend': 'google-oauth2'})
+    url = reverse('player:google-login', kwargs={'backend': 'google-oauth2'})
 
     def test_invalid_token(self):
         data = {'access_token': 'false_token'}
@@ -23,7 +23,7 @@ class GoogleLoginTests(APITestCase):
 
 
 class UserRegistrationTests(APITestCase):
-    url = reverse('register')
+    url = reverse('player:register')
 
     def test_register_user(self):
         """
@@ -73,7 +73,7 @@ class UserRegistrationTests(APITestCase):
 
 
 class UserAuthenticationTests(APITestCase):
-    url = reverse('login')
+    url = reverse('player:login')
 
     def test_valid_user_auth(self):
         """
@@ -104,7 +104,7 @@ class UserAuthenticationTests(APITestCase):
 
 
 class UserViewTests(APITestCase):
-    url = reverse('user')
+    url = reverse('player:user')
 
     def test_get_user_details(self):
         """
@@ -146,7 +146,7 @@ class UserViewTests(APITestCase):
 
 
 class FCMTokenViewTests(APITestCase):
-    url = reverse('fcm')
+    url = reverse('player:fcm')
 
     def test_update_fcm_token(self):
         """
@@ -166,7 +166,7 @@ class FCMTokenViewTests(APITestCase):
 
 
 class UserPasswordUpdateViewTests(APITestCase):
-    url = reverse('reset-password')
+    url = reverse('player:reset-password')
 
     def test_update_passowrd(self):
         user = User.objects.create_user(username='some_username', password='some_password',
@@ -180,14 +180,14 @@ class UserPasswordUpdateViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = {'username': 'some_username', 'password': 'a_new_password'}
-        response = self.client.post(reverse('login'), data)
+        response = self.client.post(reverse('player:login'), data)
         user.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['token'], user.auth_token.key)
 
 
 class GetSuggestionTests(APITestCase):
-    url = reverse('suggestions')
+    url = reverse('player:suggestions')
 
     def test_island_exists(self):
         user = User.objects.create_user(username='some_username', password='some_password',
@@ -255,7 +255,7 @@ class EmailSearchTest(APITestCase):
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        self.url = reverse("search-email", kwargs={'email': user.email})
+        self.url = reverse("player:search-email", kwargs={'email': user.email})
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)
@@ -273,7 +273,7 @@ class UsernameSearchTest(APITestCase):
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        self.url = reverse("search-username", kwargs={'username': user.username})
+        self.url = reverse("player:search-username", kwargs={'username': user.username})
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)

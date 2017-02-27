@@ -3,7 +3,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
+
 from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart
 from player.models import Profile, Inventory
 
@@ -341,7 +341,7 @@ class DockShipTest(APITestCase):
         port_id = Port.objects.filter(user=user).first().id
 
         # Parking user2's raft on user's port
-        data = {'ship_id': ship_id,  'port_id': port_id}
+        data = {'ship_id': ship_id, 'port_id': port_id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -402,8 +402,42 @@ class CorePortTest(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 5)
-        self.assertEqual(response.data[0]['id'],port_id)
-        self.assertEqual(response.data[0]['type'],"Parking")
+        self.assertEqual(response.data[0]['id'], port_id)
+        self.assertEqual(response.data[0]['type'], "Parking")
         self.assertEqual(response.data[0]['logs'][0]['ship'], ship_id)
         self.assertEqual(response.data[0]['logs'][0]['username'], user2.username)
         self.assertEqual(response.data[0]['logs'][0]['user_id'], user2.id)
+
+
+class ShipsListViewTest(APITestCase):
+    url = reverse('player:ships')
+
+    def test_port_details(self):
+        dock_url = reverse('dock-ship')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        user2 = User.objects.create_user(username='some_username2', password='some_password',
+                                         email='some_email2@gmail.com')
+        Profile.objects.create_player(username='some_username2')
+        ship_id = Ship.objects.get(user=user2).id
+        port_id = Port.objects.filter(user=user).first().id
+        # Parking user2's raft on user's port
+        data = {'ship_id': ship_id, 'port_id': port_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
+        self.client.post(dock_url, data)
+        name = Ship.objects.get(id=ship_id).ship_store.name
+        response = self.client.get(self.url)
+        raid_count = Ship.objects.get(id=ship_id).raid_count
+        ship_status = "Idle"
+        if DockChart.objects.filter(ship_id=ship_id, end_time=None).exists():
+            ship_status = "Busy"
+        port_id = DockChart.objects.get(ship_id=ship_id, end_time=None).port.id
+        username = DockChart.objects.get(ship_id=ship_id, end_time=None).port.user.username
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['name'], name)
+        self.assertEqual(response.data[0]['status'], ship_status)
+        self.assertEqual(response.data[0]['raid_count'], raid_count)
+        self.assertEqual(response.data[0]['port_id'], port_id)
+        self.assertEqual(response.data[0]['username'], username)
