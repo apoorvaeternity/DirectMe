@@ -42,15 +42,10 @@ class Dock(models.Model):
 
 
 class DockChartModelManager(models.Manager):
-    def create_entry(self, ship_id, port_owner_id, port_id):
-        free_port = Port.objects.get_empty_port(
-            user=User.objects.get(pk=port_owner_id),
-            port_id=port_id
-        )
-
+    def create_entry(self, ship_id,  port_id):
         return DockChart.objects.create(
             ship=Ship.objects.get(pk=ship_id),
-            port=free_port
+            port_id=port_id
         )
 
     def end_parking(self, port):
@@ -173,12 +168,6 @@ class PortModelManager(models.Manager):
 
         for _ in range(2):
             self._create_non_parking_port(user=user)
-
-    def get_empty_port(self, user, port_id):
-        if Port.objects.filter(user=user, id=port_id).exists():
-            port = Port.objects.get(user=user, id=port_id)
-            if not DockChart.objects.filter(port=port, end_time=None).exists():
-                return port
 
     def get_parking_ports(self, user):
         return Port.objects.filter(user=user, type__ownable=True, type__penalizable=False)

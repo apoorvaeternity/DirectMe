@@ -204,7 +204,6 @@ class FineSerializer(serializers.Serializer):
 
 class DockShipSerializer(serializers.Serializer):
     ship_id = serializers.IntegerField()
-    port_owner_id = serializers.IntegerField()
     port_id = serializers.IntegerField()
 
     def validate(self, attrs):
@@ -216,19 +215,16 @@ class DockShipSerializer(serializers.Serializer):
         except Ship.DoesNotExist:
             raise serializers.ValidationError('Ship with given ID doesn\'t exist')
 
-        port_owner_id = attrs['port_owner_id']
-        try:
-            user = User.objects.get(pk=port_owner_id)
-        except User.DoesNotExist:
-            raise serializers.ValidationError('Port owner ID doesnt exist.')
-
         port_id = attrs['port_id']
         try:
             port_id = Port.objects.get(id=port_id).id
         except Port.DoesNotExist:
             raise serializers.ValidationError('Port does not exist.')
 
-        port = Port.objects.filter(id=port_id, user=user)
+        port = Port.objects.get(id=port_id)
+
+        if port.user == ship.user:
+            raise serializers.ValidationError('Cant port on own Port')
 
         # initialize
         port_unoccupied = False
@@ -242,7 +238,6 @@ class DockShipSerializer(serializers.Serializer):
     def save(self, **kwargs):
         DockChart.objects.create_entry(
             self.validated_data['ship_id'],
-            self.validated_data['port_owner_id'],
             self.validated_data['port_id']
         )
 
