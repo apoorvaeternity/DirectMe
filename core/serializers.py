@@ -73,9 +73,15 @@ class DockPirateIslandSerializer(serializers.Serializer):
 
 
 class DockChartSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
+    def get_username(self, obj):
+        username = Ship.objects.get(pk=obj.ship_id).user.username
+        return username
+
     class Meta:
         model = DockChart
-        fields = ('ship', 'start_time', 'end_time', 'is_success')
+        fields = ('ship', 'start_time', 'end_time', 'is_success', 'username')
 
 
 class DocksListSerializer(serializers.ModelSerializer):

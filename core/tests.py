@@ -3,7 +3,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
+from django.contrib.auth.models import User
 from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart
 from player.models import Profile, Inventory
 
@@ -361,8 +361,36 @@ class DockShipTest(APITestCase):
         port_id = Port.objects.filter(user=user).first().id
 
         # Parking user2's raft on user's port
-        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id': 80}
+        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id': 7895}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['non_field_errors'][0], "Port does not exist.")
+
+class CorePortTest(APITestCase):
+    url = reverse('ports')
+
+    def test_port_details(self):
+        dock_url = reverse('dock-ship')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        user2 = User.objects.create_user(username='some_username2', password='some_password',
+                                         email='some_email2@gmail.com')
+        Profile.objects.create_player(username='some_username2')
+        ship_id = Ship.objects.get(user=user2).id
+        port_owner_id = Port.objects.filter(user=user).first().user_id
+        port_id = Port.objects.filter(user=user).first().id
+        # Parking user2's raft on user's port
+        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id': port_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
+        self.client.post(dock_url, data)
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 5)
+        self.assertEqual(response.data[0]['id'],port_id)
+        self.assertEqual(response.data[0]['type'],"Parking")
+        self.assertEqual(response.data[0]['logs'][0]['ship'], ship_id)
+        self.assertEqual(response.data[0]['logs'][0]['username'], user2.username)
