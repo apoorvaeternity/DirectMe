@@ -392,10 +392,9 @@ class CorePortTest(APITestCase):
                                          email='some_email2@gmail.com')
         Profile.objects.create_player(username='some_username2')
         ship_id = Ship.objects.get(user=user2).id
-        port_owner_id = Port.objects.filter(user=user).first().user_id
         port_id = Port.objects.filter(user=user).first().id
         # Parking user2's raft on user's port
-        data = {'ship_id': ship_id, 'port_owner_id': port_owner_id, 'port_id': port_id}
+        data = {'ship_id': ship_id, 'port_id': port_id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
         self.client.post(dock_url, data)
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
@@ -406,3 +405,4 @@ class CorePortTest(APITestCase):
         self.assertEqual(response.data[0]['type'],"Parking")
         self.assertEqual(response.data[0]['logs'][0]['ship'], ship_id)
         self.assertEqual(response.data[0]['logs'][0]['username'], user2.username)
+        self.assertEqual(response.data[0]['logs'][0]['user_id'], user2.id)
