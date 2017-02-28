@@ -1,3 +1,6 @@
+import hashlib
+import urllib.parse
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
@@ -17,18 +20,23 @@ class SocialSerializer(serializers.Serializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    # todo to be added
-    # avatar = serializers.ReadOnlyField(source='profile.avatar', read_only=True)
     user_id = serializers.ReadOnlyField(source='id', read_only=True)
     island_name = serializers.ReadOnlyField(source='profile.island.name', read_only=True)
     island_id = serializers.ReadOnlyField(source='profile.island.id', read_only=True)
     experience = serializers.ReadOnlyField(source='profile.experience', read_only=True)
     inventory = InventorySerializer(many=True, read_only=True)
+    gravatar = serializers.SerializerMethodField()
+
+    def get_gravatar(self, obj):
+        return "https://www.gravatar.com/avatar/%s?%s" % (
+            hashlib.md5(obj.email.lower().encode('utf-8')).hexdigest(),
+            urllib.parse.urlencode({'s': str(40), 'd': 'identicon'})
+        )
 
     class Meta:
         model = User
         fields = ('username', 'user_id', 'email', 'first_name', 'last_name', 'island_id', 'island_name', 'experience',
-                  'inventory')
+                  'inventory', 'gravatar')
         read_only_fields = ('username', 'email', 'experience')
 
 
