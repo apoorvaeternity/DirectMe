@@ -1,3 +1,6 @@
+import os
+from uuid import uuid4
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -281,15 +284,28 @@ class ShipStoreModelManager(models.Manager):
         return ship
 
 
+def upload_ship_image(instance, filename):
+    ext = filename.split('.')[-1]
+    # get filename
+    if instance.pk:
+        filename = '{}.{}'.format(instance.pk, ext)
+    else:
+        # set filename as random string
+        filename = '{}.{}'.format(uuid4().hex, ext)
+    # return the whole path to the file
+    return os.path.join('ship-store/ships/', filename)
+
+
 class ShipStore(models.Model):
     name = models.CharField(max_length=255)
     cost_multiplier = models.FloatField()
     experience_gain = models.IntegerField()
-    image = models.ImageField()
+    image = models.ImageField(upload_to=upload_ship_image)
     # Buy cost in gold coins
     buy_cost = models.IntegerField()
 
     objects = ShipStoreModelManager()
+
 
     def __str__(self):
         return self.name
