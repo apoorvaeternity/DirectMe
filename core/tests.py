@@ -380,7 +380,7 @@ class DockShipTest(APITestCase):
 
 
 class CorePortTest(APITestCase):
-    url = reverse('ports')
+    url = None
 
     def test_port_details(self):
         dock_url = reverse('dock-ship')
@@ -398,6 +398,7 @@ class CorePortTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
         self.client.post(dock_url, data)
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        self.url = reverse('ports', kwargs={'user_id': user.id})
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 5)
