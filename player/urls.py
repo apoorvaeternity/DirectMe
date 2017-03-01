@@ -5,6 +5,8 @@ from .views import UserRegistrationView, UserAuthenticationView, UserView, FCMTo
     SuggestionListView, UsernameSearchView, EmailSearchView
 from .views import exchange_token
 
+app_name = 'player'
+
 urlpatterns = [
     url(r'social/(?P<backend>[^/]+)/$', exchange_token, name='google-login'),
     url(r'^search-username/(?P<username>\w+)/$', UsernameSearchView.as_view(), name='search-username'),

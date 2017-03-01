@@ -262,10 +262,40 @@ class PortsListSerializer(serializers.ModelSerializer):
 
 class ShipsListSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='ship_store.name')
+    status = serializers.SerializerMethodField('get_ship_status')
+    island_id = serializers.SerializerMethodField()
+    park_time = serializers.SerializerMethodField()
+    port_id = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+
+    def get_ship_status(self, obj):
+        if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
+            return "Busy"
+        return "Idle"
+
+    def get_island_id(self, obj):
+        if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
+            island_id = DockChart.objects.get(ship_id=obj, end_time=None).port.user.profile.island_id
+            return island_id
+
+    def get_park_time(self, obj):
+        if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
+            park_time = DockChart.objects.get(ship_id=obj, end_time=None).start_time
+            return park_time
+
+    def get_port_id(self, obj):
+        if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
+            port_id = DockChart.objects.get(ship_id=obj, end_time=None).port.id
+            return port_id
+
+    def get_username(self, obj):
+        if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
+            username = DockChart.objects.get(ship_id=obj, end_time=None).port.user.username
+            return username
 
     class Meta:
         model = Ship
-        fields = ('id', 'name', 'raid_count')
+        fields = ('id', 'name', 'raid_count', 'status', 'island_id', 'park_time', 'port_id', 'username')
 
 
 class ShipUpgradeDetailSerializer(serializers.ModelSerializer):
