@@ -1,169 +1,543 @@
 [
-  {
-    "model": "core.island",
-    "pk": 1,
-    "fields": {
-      "name": "Coconut Island",
-      "item": 1,
-      "habitable": true
-    }
-  },
-  {
-    "model": "core.island",
-    "pk": 2,
-    "fields": {
-      "name": "Timber Island",
-      "item": 2,
-      "habitable": true
-    }
-  },
-  {
-    "model": "core.island",
-    "pk": 3,
-    "fields": {
-      "name": "Banana Island",
-      "item": 3,
-      "habitable": true
-    }
-  },
-  {
-    "model": "core.island",
-    "pk": 4,
-    "fields": {
-      "name": "Bamboo Island",
-      "item": 4,
-      "habitable": true
-    }
-  },
-  {
-    "model": "core.island",
-    "pk": 5,
-    "fields": {
-      "name": "Pirate Island",
-      "item": 5,
-      "habitable": false
-    }
-  },
-  {
-    "model": "core.item",
-    "pk": 1,
-    "fields": {
-      "name": "Coconut"
-    }
-  },
-  {
-    "model": "core.item",
-    "pk": 2,
-    "fields": {
-      "name": "Timber"
-    }
-  },
-  {
-    "model": "core.item",
-    "pk": 3,
-    "fields": {
-      "name": "Banana"
-    }
-  },
-  {
-    "model": "core.item",
-    "pk": 4,
-    "fields": {
-      "name": "Bamboo"
-    }
-  },
-  {
-    "model": "core.item",
-    "pk": 5,
-    "fields": {
-      "name": "Gold"
-    }
-  },
-  {
-    "model": "core.level",
-    "pk": 1,
-    "fields": {
-      "level_number": 1,
-      "experience_required": 10
-    }
-  },
-  {
-    "model": "core.level",
-    "pk": 2,
-    "fields": {
-      "level_number": 2,
-      "experience_required": 100
-    }
-  },
-  {
-    "model": "core.level",
-    "pk": 3,
-    "fields": {
-      "level_number": 3,
-      "experience_required": 250
-    }
-  },
-  {
-    "model": "core.porttype",
-    "pk": 1,
-    "fields": {
-      "name": "Parking",
-      "penalizable": false,
-      "ownable": true
-    }
-  },
-  {
-    "model": "core.porttype",
-    "pk": 2,
-    "fields": {
-      "name": "Non Parking",
-      "penalizable": true,
-      "ownable": true
-    }
-  },
-  {
-    "model": "core.porttype",
-    "pk": 3,
-    "fields": {
-      "name": "Public",
-      "penalizable": true,
-      "ownable": false
-    }
-  },
-  {
-    "model": "core.shipstore",
-    "pk": 1,
-    "fields": {
-      "name": "Raft",
-      "cost_multiplier": 1.0,
-      "experience_gain": 0,
-      "image": "Student_ID.jpg",
-      "buy_cost": 1000
-    }
-  },
-  {
-    "model": "core.shipstore",
-    "pk": 2,
-    "fields": {
-      "name": "Black Pearl",
-      "cost_multiplier": 100.0,
-      "experience_gain": 1000,
-      "image": "Student_ID_7U4gNxw.jpg",
-      "buy_cost": 9999999
-    }
-  },
-  {
-    "model": "core.slot",
-    "pk": 1,
-    "fields": {
-      "unlock_level": 1
-    }
-  },
-  {
-    "model": "core.slot",
-    "pk": 2,
-    "fields": {
-      "unlock_level": 3
-    }
+{
+  "model": "core.island",
+  "pk": 1,
+  "fields": {
+    "name": "Coconut Island",
+    "item": 1,
+    "habitable": true
   }
+},
+{
+  "model": "core.island",
+  "pk": 2,
+  "fields": {
+    "name": "Timber Island",
+    "item": 2,
+    "habitable": true
+  }
+},
+{
+  "model": "core.island",
+  "pk": 3,
+  "fields": {
+    "name": "Banana Island",
+    "item": 3,
+    "habitable": true
+  }
+},
+{
+  "model": "core.island",
+  "pk": 4,
+  "fields": {
+    "name": "Bamboo Island",
+    "item": 4,
+    "habitable": true
+  }
+},
+{
+  "model": "core.island",
+  "pk": 5,
+  "fields": {
+    "name": "Pirate Island",
+    "item": 5,
+    "habitable": false
+  }
+},
+{
+  "model": "core.item",
+  "pk": 1,
+  "fields": {
+    "name": "Coconut"
+  }
+},
+{
+  "model": "core.item",
+  "pk": 2,
+  "fields": {
+    "name": "Timber"
+  }
+},
+{
+  "model": "core.item",
+  "pk": 3,
+  "fields": {
+    "name": "Banana"
+  }
+},
+{
+  "model": "core.item",
+  "pk": 4,
+  "fields": {
+    "name": "Bamboo"
+  }
+},
+{
+  "model": "core.item",
+  "pk": 5,
+  "fields": {
+    "name": "Gold"
+  }
+},
+{
+  "model": "core.level",
+  "pk": 1,
+  "fields": {
+    "level_number": 1,
+    "experience_required": 900
+  }
+},
+{
+  "model": "core.level",
+  "pk": 2,
+  "fields": {
+    "level_number": 2,
+    "experience_required": 2000
+  }
+},
+{
+  "model": "core.level",
+  "pk": 3,
+  "fields": {
+    "level_number": 3,
+    "experience_required": 3300
+  }
+},
+{
+  "model": "core.level",
+  "pk": 4,
+  "fields": {
+    "level_number": 4,
+    "experience_required": 5000
+  }
+},
+{
+  "model": "core.level",
+  "pk": 5,
+  "fields": {
+    "level_number": 5,
+    "experience_required": 6900
+  }
+},
+{
+  "model": "core.level",
+  "pk": 6,
+  "fields": {
+    "level_number": 6,
+    "experience_required": 8500
+  }
+},
+{
+  "model": "core.level",
+  "pk": 7,
+  "fields": {
+    "level_number": 7,
+    "experience_required": 11600
+  }
+},
+{
+  "model": "core.level",
+  "pk": 8,
+  "fields": {
+    "level_number": 8,
+    "experience_required": 15100
+  }
+},
+{
+  "model": "core.level",
+  "pk": 9,
+  "fields": {
+    "level_number": 9,
+    "experience_required": 19200
+  }
+},
+{
+  "model": "core.level",
+  "pk": 10,
+  "fields": {
+    "level_number": 10,
+    "experience_required": 24100
+  }
+},
+{
+  "model": "core.level",
+  "pk": 12,
+  "fields": {
+    "level_number": 12,
+    "experience_required": 36600
+  }
+},
+{
+  "model": "core.level",
+  "pk": 13,
+  "fields": {
+    "level_number": 13,
+    "experience_required": 43100
+  }
+},
+{
+  "model": "core.level",
+  "pk": 14,
+  "fields": {
+    "level_number": 14,
+    "experience_required": 49600
+  }
+},
+{
+  "model": "core.level",
+  "pk": 15,
+  "fields": {
+    "level_number": 15,
+    "experience_required": 56300
+  }
+},
+{
+  "model": "core.level",
+  "pk": 16,
+  "fields": {
+    "level_number": 16,
+    "experience_required": 63800
+  }
+},
+{
+  "model": "core.level",
+  "pk": 17,
+  "fields": {
+    "level_number": 17,
+    "experience_required": 71500
+  }
+},
+{
+  "model": "core.level",
+  "pk": 18,
+  "fields": {
+    "level_number": 18,
+    "experience_required": 79500
+  }
+},
+{
+  "model": "core.level",
+  "pk": 19,
+  "fields": {
+    "level_number": 19,
+    "experience_required": 88500
+  }
+},
+{
+  "model": "core.level",
+  "pk": 20,
+  "fields": {
+    "level_number": 20,
+    "experience_required": 99000
+  }
+},
+{
+  "model": "core.level",
+  "pk": 21,
+  "fields": {
+    "level_number": 11,
+    "experience_required": 30100
+  }
+},
+{
+  "model": "core.level",
+  "pk": 22,
+  "fields": {
+    "level_number": 0,
+    "experience_required": 0
+  }
+},
+{
+  "model": "core.porttype",
+  "pk": 1,
+  "fields": {
+    "name": "Parking",
+    "penalizable": false,
+    "ownable": true
+  }
+},
+{
+  "model": "core.porttype",
+  "pk": 2,
+  "fields": {
+    "name": "Non Parking",
+    "penalizable": true,
+    "ownable": true
+  }
+},
+{
+  "model": "core.porttype",
+  "pk": 3,
+  "fields": {
+    "name": "Public",
+    "penalizable": true,
+    "ownable": false
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 1,
+  "fields": {
+    "name": "Raft",
+    "cost_multiplier": 1.0,
+    "experience_gain": 500,
+    "image": "ship-store/ships/57e1c6d8ba1241edbc217ea87344e641.jpg",
+    "buy_cost": 0
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 2,
+  "fields": {
+    "name": "Liverpool",
+    "cost_multiplier": 1.5,
+    "experience_gain": 500,
+    "image": "ship-store/ships/f9d077e3cce0446bae678596c57a261d.jpg",
+    "buy_cost": 4
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 3,
+  "fields": {
+    "name": "Holy Mackerel",
+    "cost_multiplier": 1.75,
+    "experience_gain": 500,
+    "image": "ship-store/ships/5e6f63032e2b41489b9b0f6b54560edb.jpg",
+    "buy_cost": 6
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 4,
+  "fields": {
+    "name": "St. Aphrodite",
+    "cost_multiplier": 2.0,
+    "experience_gain": 500,
+    "image": "ship-store/ships/76ecde2726814413a7263946985a4e4c.jpg",
+    "buy_cost": 8
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 5,
+  "fields": {
+    "name": "The Henrietta",
+    "cost_multiplier": 2.25,
+    "experience_gain": 500,
+    "image": "ship-store/ships/8cd3bf1ccb3c4452be29b3cf9c5f0543.jpg",
+    "buy_cost": 22
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 6,
+  "fields": {
+    "name": "Belafonte",
+    "cost_multiplier": 2.5,
+    "experience_gain": 500,
+    "image": "ship-store/ships/fa335a9d08a6407e949408142d46b4eb.jpg",
+    "buy_cost": 36
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 7,
+  "fields": {
+    "name": "Twelve Apostles",
+    "cost_multiplier": 2.75,
+    "experience_gain": 500,
+    "image": "ship-store/ships/7ec2315ec83a4a7abeaca0937ca8467a.jpg",
+    "buy_cost": 80
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 8,
+  "fields": {
+    "name": "USS Valkyrie",
+    "cost_multiplier": 3.75,
+    "experience_gain": 500,
+    "image": "ship-store/ships/3d0e59fb6f2b43f29951313539b1e590.jpg",
+    "buy_cost": 385
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 9,
+  "fields": {
+    "name": "The Wanderer",
+    "cost_multiplier": 4.0,
+    "experience_gain": 500,
+    "image": "ship-store/ships/8c339625a0a341839da379476e5bede2.jpg",
+    "buy_cost": 470
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 10,
+  "fields": {
+    "name": "Empress of Coconut",
+    "cost_multiplier": 3.0,
+    "experience_gain": 500,
+    "image": "ship-store/ships/62874f5418344fb3bcc26794f656a35d.jpg",
+    "buy_cost": 125
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 11,
+  "fields": {
+    "name": "Borneo Prince",
+    "cost_multiplier": 4.25,
+    "experience_gain": 500,
+    "image": "ship-store/ships/728d28d7d0084dedb35c0f09cd8acfc8.jpg",
+    "buy_cost": 540
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 12,
+  "fields": {
+    "name": "The Walrus",
+    "cost_multiplier": 3.25,
+    "experience_gain": 500,
+    "image": "ship-store/ships/f75815c5a393482ba4862822db312272.jpg",
+    "buy_cost": 184
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 13,
+  "fields": {
+    "name": "Eagle's Shadow",
+    "cost_multiplier": 4.5,
+    "experience_gain": 500,
+    "image": "ship-store/ships/c3c3aba277c245419631d8c618d2df06.jpg",
+    "buy_cost": 600
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 14,
+  "fields": {
+    "name": "SS Royale",
+    "cost_multiplier": 4.75,
+    "experience_gain": 500,
+    "image": "ship-store/ships/426f9552bd944190b4d08c9ae739daf8.jpg",
+    "buy_cost": 675
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 15,
+  "fields": {
+    "name": "Batavia Queen",
+    "cost_multiplier": 3.5,
+    "experience_gain": 500,
+    "image": "ship-store/ships/f513b53bc07643d3a725ce956b01061a.jpg",
+    "buy_cost": 265
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 16,
+  "fields": {
+    "name": "Ghost Ship",
+    "cost_multiplier": 5.0,
+    "experience_gain": 500,
+    "image": "ship-store/ships/ab7c78928aa4469c8690cdeedf99a5e0.jpg",
+    "buy_cost": 750
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 17,
+  "fields": {
+    "name": "USS Dakota",
+    "cost_multiplier": 5.25,
+    "experience_gain": 500,
+    "image": "ship-store/ships/b2a05ef10aa8481eb575d0a0697c6180.jpg",
+    "buy_cost": 825
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 18,
+  "fields": {
+    "name": "USS Valhalla",
+    "cost_multiplier": 5.5,
+    "experience_gain": 500,
+    "image": "ship-store/ships/71e9a16361b447888ad2f6c9269659f7.jpg",
+    "buy_cost": 900
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 19,
+  "fields": {
+    "name": "The Black Freighter",
+    "cost_multiplier": 5.75,
+    "experience_gain": 500,
+    "image": "ship-store/ships/88c0f2afabb8450bbef8b5b9e9dfc230.jpg",
+    "buy_cost": 1000
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 20,
+  "fields": {
+    "name": "The Black Pearl",
+    "cost_multiplier": 6.0,
+    "experience_gain": 500,
+    "image": "ship-store/ships/45b3134f72bf4e64ab45c09f38ff3d5a.jpg",
+    "buy_cost": 1300
+  }
+},
+{
+  "model": "core.shipstore",
+  "pk": 21,
+  "fields": {
+    "name": "Ripple",
+    "cost_multiplier": 1.25,
+    "experience_gain": 500,
+    "image": "ship-store/ships/7bf24342bdb94a1a8fb8a76e08dfda75.jpg",
+    "buy_cost": 2
+  }
+},
+{
+  "model": "core.slot",
+  "pk": 2,
+  "fields": {
+    "unlock_level": 22
+  }
+},
+{
+  "model": "core.slot",
+  "pk": 3,
+  "fields": {
+    "unlock_level": 6
+  }
+},
+{
+  "model": "core.slot",
+  "pk": 4,
+  "fields": {
+    "unlock_level": 10
+  }
+},
+{
+  "model": "core.slot",
+  "pk": 5,
+  "fields": {
+    "unlock_level": 15
+  }
+},
+{
+  "model": "core.slot",
+  "pk": 6,
+  "fields": {
+    "unlock_level": 18
+  }
+}
 ]
