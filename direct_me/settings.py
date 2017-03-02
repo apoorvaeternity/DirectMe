@@ -175,6 +175,13 @@ if 'IS_HEROKU' in os.environ:
         'SECRET_TOKEN': os.environ.get('OPBEAT_SECRET_TOKEN'),
     }
 
+    OPBEAT = {
+        'ORGANIZATION_ID': os.environ.get('OPBEAT_ORGANIZATION_ID'),
+        'APP_ID': os.environ.get('OPBEAT_APP_ID'),
+        'SECRET_TOKEN': os.environ.get('OPBEAT_SECRET_TOKEN'),
+        'DEBUG': True,
+    }
+
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
