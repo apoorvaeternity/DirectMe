@@ -10,12 +10,13 @@ install:
   - pip install codecov
 
 before_script:
+  - sudo apt-get install openssl libssl-dev
   - psql -c "CREATE DATABASE direct_me;" -U postgres
   - python manage.py migrate
 
 script:
-  - python manage.py test
-  - coverage run --source='.' manage.py test
+  - OPBEAT_DISABLE_SEND=true python manage.py test
+  - OPBEAT_DISABLE_SEND=true coverage run --source='.' manage.py test
 
 
 after_success:

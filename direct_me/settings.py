@@ -50,9 +50,11 @@ INSTALLED_APPS = [
     'social_django',
     'fcm_django',
     'storages',
+    'opbeat.contrib.django',
 ]
 
 MIDDLEWARE_CLASSES = [
+    'opbeat.contrib.django.middleware.OpbeatAPMMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -166,6 +168,12 @@ if 'IS_HEROKU' in os.environ:
     AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION')
     AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
     AWS_S3_FILE_OVERWRITE = False
+
+    OPBEAT = {
+        'ORGANIZATION_ID': os.environ.get('OPBEAT_ORGANIZATION_ID'),
+        'APP_ID': os.environ.get('OPBEAT_APP_ID'),
+        'SECRET_TOKEN': os.environ.get('OPBEAT_SECRET_TOKEN'),
+    }
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
