@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'core',
     'corsheaders',
     'social_django',
-    'fcm_django'
+    'fcm_django',
+    'storages',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -103,7 +104,7 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
 
 FCM_DJANGO_SETTINGS = {
-        "FCM_SERVER_KEY": os.environ.get("FCM_SERVER_KEY")
+    "FCM_SERVER_KEY": os.environ.get("FCM_SERVER_KEY")
 }
 
 if 'IS_HEROKU' in os.environ:
@@ -157,8 +158,13 @@ if 'IS_HEROKU' in os.environ:
     STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION')
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
