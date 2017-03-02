@@ -165,6 +165,7 @@ if 'IS_HEROKU' in os.environ:
     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION')
     AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
+    AWS_S3_FILE_OVERWRITE = False
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
