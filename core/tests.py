@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -462,7 +463,6 @@ class CorePortTest(APITestCase):
         self.assertEqual(response.data[0]['logs'][0]['user_id'], user2.id)
 
 
-
 class ShipsListViewTest(APITestCase):
     url = reverse('player:ships')
 
@@ -495,3 +495,54 @@ class ShipsListViewTest(APITestCase):
         self.assertEqual(response.data[0]['raid_count'], raid_count)
         self.assertEqual(response.data[0]['port_id'], port_id)
         self.assertEqual(response.data[0]['username'], username)
+
+
+class UndockShipTest(APITestCase):
+    url = reverse('undock')
+
+    def test_undock(self):
+        dock_url = reverse('dock-ship')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        user2 = User.objects.create_user(username='some_username2', password='some_password',
+                                         email='some_email2@gmail.com')
+        Profile.objects.create_player(username='some_username2')
+        ship_id = Ship.objects.get(user=user2).id
+        port_id = Port.objects.filter(user=user, type__penalizable=False).first().id
+        # Parking user2's raft on user's port
+        data = {'ship_id': ship_id, 'port_id': port_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
+        self.client.post(dock_url, data)
+        data = {'ship_id': ship_id}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_auto_undock(self):
+        dock_url = reverse('dock-ship')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        user2 = User.objects.create_user(username='some_username2', password='some_password',
+                                         email='some_email2@gmail.com')
+        Profile.objects.create_player(username='some_username2')
+        ship_id = Ship.objects.get(user=user2).id
+        port_id = Port.objects.filter(user=user, type__penalizable=False).first().id
+        # Parking user2's raft on user's port
+        data = {'ship_id': ship_id, 'port_id': port_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
+        response = self.client.post(dock_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        dock = DockChart.objects.get(ship_id=ship_id, end_time=None)
+        dock.start_time -= timezone.timedelta(minutes=40)
+        dock.save()
+        dock.refresh_from_db()
+
+        ships_url = reverse('player:ships')
+        response = self.client.get(ships_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['status'], "Idle")
+        self.assertEqual(response.data[0]['name'], "Raft")

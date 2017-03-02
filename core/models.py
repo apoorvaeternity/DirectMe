@@ -45,7 +45,7 @@ class Dock(models.Model):
 
 
 class DockChartModelManager(models.Manager):
-    def create_entry(self, ship_id,  port_id):
+    def create_entry(self, ship_id, port_id):
         return DockChart.objects.create(
             ship=Ship.objects.get(pk=ship_id),
             port_id=port_id
@@ -63,7 +63,29 @@ class DockChartModelManager(models.Manager):
         dock_chart.end_time = timezone.now()
         dock_chart.is_success = True
         dock_chart.save()
+
+        user = Ship.objects.get(pk=ship.id).user
+        # TODO: Change item generation formula
+        time_fraction = timezone.now() - dock_chart.start_time
+        minutes = time_fraction.total_seconds() / 60
+        value = int(minutes) * dock_chart.ship.ship_store.cost_multiplier
+        from player.models import Inventory
+        Inventory.objects.add_item(user=user, item=dock_chart.port.user.profile.island.item, value=value)
+        # TODO: Change exp gain formula
+        from player.models import Profile
+        Profile.objects.add_exp(user.profile, 50)
+
         return dock_chart
+
+    # undock timed out ships of a user
+    def undock_timedout(self, user_id):
+        ships = Ship.objects.filter(user_id=user_id)
+        for ship in ships:
+            dock_chart = DockChart.objects.filter(end_time=None, ship=ship)
+            for dock in dock_chart:
+                endtime = dock.start_time + timezone.timedelta(minutes=30)
+                if timezone.now() >= endtime:
+                    self.undock_ship(dock.ship)
 
     def allocate_pirate_port(self, ship):
         pirate_ports = Port.objects.filter(type__ownable=False)
@@ -87,7 +109,7 @@ class DockChartModelManager(models.Manager):
 
 
 class DockChart(models.Model):
-    start_time = models.DateTimeField(auto_now=True)
+    start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(default=None, null=True)
     is_success = models.BooleanField(default=False)
     ship = models.ForeignKey('Ship', related_name='ships')
@@ -305,7 +327,6 @@ class ShipStore(models.Model):
     buy_cost = models.IntegerField()
 
     objects = ShipStoreModelManager()
-
 
     def __str__(self):
         return self.name
