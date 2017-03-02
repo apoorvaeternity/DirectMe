@@ -3,6 +3,7 @@ from random import randint
 from django.conf import settings
 from django.contrib.auth.models import User
 from requests.exceptions import HTTPError
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes
@@ -14,7 +15,7 @@ from social_django.utils import psa
 from core.models import Port
 from core.serializers import SuggestionListSerializer
 from player.models import Profile
-from player.serializers import SocialSerializer
+from player.serializers import SocialSerializer, LeaderboardSerializer
 
 
 @api_view(http_method_names=['POST'])
@@ -93,6 +94,15 @@ def exchange_token(request, backend):
 
 from player.serializers import UserRegistrationSerializer, UserAuthenticationSerializer, UserFcmSerializer, \
     UserPasswordSerializer, UserProfileSerializer, UserSearchSerializer
+
+
+class LeaderBoardView(generics.ListAPIView):
+    """
+    Shows the leaderboard
+    """
+    queryset = Profile.objects.raw("SELECT id, RANK() over (ORDER BY points DESC ) as rank  FROM player_profile ;")
+    serializer_class = LeaderboardSerializer
+    paginate_by = 25
 
 
 class UserRegistrationView(APIView):

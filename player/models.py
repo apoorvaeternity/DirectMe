@@ -1,18 +1,16 @@
+from decimal import Decimal
 from random import randint
+
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Max
 from rest_framework.authtoken.models import Token
 
 from core.models import Item, Island, Port, Dock
 from core.models import Item, ShipStore
 
 
-# from player.models import Profile, Inventory
-# from ship.models import Port, Dock
-
-
 class ProfileModelManager(models.Manager):
-
     def create_player(self, username):
         user = User.objects.get(
             username=username
@@ -40,6 +38,18 @@ class ProfileModelManager(models.Manager):
         profile.experience -= exp
         profile.save()
 
+    def update_points(self, user):
+        user = User.objects.get(username='user1')
+        points = user.profile.points
+        user_items = user.inventory.all()
+        max_items = Inventory.objects.values('item').annotate(value=Max('count'))
+        for item in user_items:
+            points += Decimal(item.count) / Decimal(max_items.get(item=item.id)['value'])
+        points += Decimal(user.profile.experience) / Decimal(
+            Profile.objects.aggregate(Max('experience'))['experience__max'])
+        user.profile.points = points
+        user.profile.save()
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User)
@@ -47,6 +57,7 @@ class Profile(models.Model):
     experience = models.IntegerField(default=10)
     island = models.ForeignKey(Island, default=None, null=True)
     fcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
+    points = models.DecimalField(default=0.0, max_digits=12, decimal_places=10)
     objects = ProfileModelManager()
 
     def save(self, force_insert=False, force_update=False, using=None,

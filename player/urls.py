@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from core.views import ShipsListView
 from .views import UserRegistrationView, UserAuthenticationView, UserView, FCMTokenView, UserPasswordUpdateView, \
-    SuggestionListView, UsernameSearchView, EmailSearchView
+    SuggestionListView, UsernameSearchView, EmailSearchView, LeaderBoardView
 from .views import exchange_token
 
 app_name = 'player'
@@ -18,5 +18,6 @@ urlpatterns = [
     url(r'^password-reset/', UserPasswordUpdateView.as_view(), name='reset-password'),
     url(r'^ships/$', ShipsListView.as_view(), name='ships'),
     url(r'^get-suggestions/$', SuggestionListView.as_view(), name='suggestions'),
+    url(r'^leaderboard/$', LeaderBoardView.as_view(), name='leaderboard'),
     url(r'', UserView.as_view(), name='user'),
 ]
