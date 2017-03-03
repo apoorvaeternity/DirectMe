@@ -546,3 +546,37 @@ class UndockShipTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['status'], "Idle")
         self.assertEqual(response.data[0]['name'], "Raft")
+
+
+class DockListViewTest(APITestCase):
+    url = reverse('docks')
+
+    def test_docks_details(self):
+        dock_url = reverse('dock-ship')
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        user2 = User.objects.create_user(username='some_username2', password='some_password',
+                                         email='some_email2@gmail.com')
+        Profile.objects.create_player(username='some_username2')
+        ship_id = Ship.objects.get(user=user2).id
+        port_id = Port.objects.filter(user=user, type__penalizable=False).first().id
+        # Parking user2's raft on user's port
+        data = {'ship_id': ship_id, 'port_id': port_id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user2.auth_token.key))
+        response = self.client.post(dock_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        docks_url = reverse('docks')
+        response = self.client.get(docks_url)
+        ship_name = Ship.objects.get(pk=ship_id).ship_store.name
+        ship_image = Ship.objects.get(pk=ship_id).ship_store.image.url
+        ship_status = "Idle"
+        if DockChart.objects.filter(ship_id=ship_id, end_time=None).exists():
+            ship_status = "Busy"
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[1]['ship'], ship_id)
+        self.assertEqual(response.data[1]['name'], ship_name)
+        self.assertEqual(response.data[1]['ship_image'], ship_image)
+        self.assertEqual(response.data[1]['status'], ship_status)
