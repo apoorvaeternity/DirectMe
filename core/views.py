@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.models import ShipStore, Version, Dock, Ship, Port
+from core.models import ShipStore, Version, Dock, Ship, Port, DockChart
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
     DockPirateIslandSerializer, PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, \
     UpdateShipSerializer, BuyShipSerializer
@@ -38,6 +38,7 @@ class DocksListView(APIView):
     serializer_class = DocksListSerializer
 
     def get(self, request):
+        DockChart.objects.undock_timedout(user_id=request.user.id)
         ships = get_list_or_404(Dock, user_id=request.user.id)
         serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -72,6 +73,7 @@ class PortsListView(APIView):
     def get(self, request, user_id=None):
         if not user_id:
             user_id = request.user.id
+        DockChart.objects.undock_timedout(user_id=user_id)
         ports = get_list_or_404(Port, user_id=user_id)
         serializer = self.serializer_class(ports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -87,6 +89,7 @@ class ShipsListView(APIView):
     serializer_class = ShipsListSerializer
 
     def get(self, request):
+        DockChart.objects.undock_timedout(request.user.id)
         ships = get_list_or_404(Ship, user_id=request.user.id, is_active=True)
         serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

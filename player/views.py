@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from social_django.utils import psa
 
-from core.models import Port
+from core.models import Port, DockChart
 from core.serializers import SuggestionListSerializer
 from player.models import Profile
 from player.serializers import SocialSerializer, LeaderboardSerializer
@@ -145,6 +145,7 @@ class UserView(APIView):
     serializer_class = UserProfileSerializer
 
     def get(self, request, *args, **kwargs):
+        DockChart.objects.undock_timedout(request.user.id)
         serializer = self.serializer_class(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -204,7 +205,7 @@ class SuggestionListView(APIView):
             'name': user.username,
             'user_id': user.id,
             'parking': parking_ports,
-            'non-parking': non_parking_ports
+            'non_parking': non_parking_ports
         })
 
     def post(self, request):
@@ -219,6 +220,7 @@ class SuggestionListView(APIView):
 
                 random_index = randint(0, data.count() - 1)
                 user = data[random_index]
+                DockChart.objects.undock_timedout(user.id)
 
                 # remove already selected user from qureyset
                 data = data.exclude(id=user.id)

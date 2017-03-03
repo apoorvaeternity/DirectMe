@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User
-from django.utils import timezone
 from rest_framework import serializers
 
-from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, PortType, FineLog, Level, Island
+from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, FineLog, Level, Island
 from player.models import Profile
 
 
@@ -174,16 +173,7 @@ class UndockSerializer(serializers.Serializer):
     def undock(self, request):
         ship_id = self.validated_data['ship_id']
         ship = Ship.objects.get(pk=ship_id)
-        dock_chart = DockChart.objects.undock_ship(ship)
-
-        # TODO: Change item generation formula
-        time_fraction = timezone.now() - dock_chart.start_time
-        minutes = time_fraction.total_seconds() / 60
-        value = int(minutes) * dock_chart.ship.ship_store.cost_multiplier
-        from player.models import Inventory
-        Inventory.objects.add_item(user=request.user, item=dock_chart.port.user.profile.island.item, value=value)
-        # TODO: Change exp gain formula
-        Profile.objects.add_exp(request.user.profile, 50)
+        DockChart.objects.undock_ship(ship)
 
 
 class FineSerializer(serializers.Serializer):
@@ -238,7 +228,7 @@ class DockShipSerializer(serializers.Serializer):
         # initialize
         port_unoccupied = False
         if DockChart.objects.filter(port=port, end_time=None).count() == 0:
-                port_unoccupied = True
+            port_unoccupied = True
         if not port_unoccupied:
             raise serializers.ValidationError('Port is busy.')
 
