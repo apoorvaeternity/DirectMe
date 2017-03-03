@@ -93,7 +93,46 @@ class DockChartSerializer(serializers.ModelSerializer):
 
 
 class DocksListSerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField(source='ship_store.name')
+    name = serializers.SerializerMethodField()
+    ship_image = serializers.SerializerMethodField()
+    island_id = serializers.SerializerMethodField()
+    park_time = serializers.SerializerMethodField()
+    port_id = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField('get_ship_status')
+
+    def get_name(self, obj):
+        if Ship.objects.filter(pk=obj.ship_id).exists():
+            return Ship.objects.get(pk=obj.ship_id).ship_store.name
+
+    def get_ship_image(self, obj):
+        if Ship.objects.filter(pk=obj.ship_id).exists():
+            return Ship.objects.get(pk=obj.ship_id).ship_store.image.url
+
+    def get_ship_status(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            return "Busy"
+        return "Idle"
+
+    def get_island_id(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            island_id = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.profile.island_id
+            return island_id
+
+    def get_park_time(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            park_time = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).start_time
+            return park_time
+
+    def get_port_id(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            port_id = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.id
+            return port_id
+
+    def get_username(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            username = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.username
+            return username
 
     class Meta:
         model = Dock
