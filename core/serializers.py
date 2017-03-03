@@ -262,6 +262,7 @@ class ShipsListSerializer(serializers.ModelSerializer):
     park_time = serializers.SerializerMethodField()
     port_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
+    ship_image = serializers.SerializerMethodField()
 
     def get_ship_status(self, obj):
         if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
@@ -288,9 +289,12 @@ class ShipsListSerializer(serializers.ModelSerializer):
             username = DockChart.objects.get(ship_id=obj, end_time=None).port.user.username
             return username
 
+    def get_ship_image(self, obj):
+        return obj.ship_store.image.url
+
     class Meta:
         model = Ship
-        fields = ('id', 'name', 'raid_count', 'status', 'island_id', 'park_time', 'port_id', 'username')
+        fields = ('id', 'name', 'ship_image', 'raid_count', 'status', 'island_id', 'park_time', 'port_id', 'username')
 
 
 class ShipUpgradeDetailSerializer(serializers.ModelSerializer):
