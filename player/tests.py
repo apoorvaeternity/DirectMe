@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -143,6 +144,29 @@ class UserViewTests(APITestCase):
 
         user.refresh_from_db()
         self.assertEqual(user.first_name, 'Jon')
+
+    def test_last_seen(self):
+        """
+        Ensure last_seen is updated on calling /core/ports/ API
+        """
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+        profile = Profile.objects.get(user=user)
+        profile.last_seen += timezone.timedelta(minutes=40)
+        profile.save()
+        profile.refresh_from_db()
+
+        # updating the last_seen of profile by 40 minutes
+        self.assertEqual(profile.last_seen.minute, (timezone.now() + timezone.timedelta(minutes=40)).minute)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        response = self.client.get(self.url)
+
+        profile.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(profile.last_seen.minute, timezone.now().minute)
 
 
 class FCMTokenViewTests(APITestCase):

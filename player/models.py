@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Max
 from rest_framework.authtoken.models import Token
+from django.utils import timezone
 
 from core.models import Item, Island, Port, Dock
 from core.models import Item, ShipStore
@@ -50,6 +51,10 @@ class ProfileModelManager(models.Manager):
         user.profile.points = points
         user.profile.save()
 
+    def update_last_seen(self, profile):
+        profile.last_seen = timezone.now()
+        profile.save()
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User)
@@ -59,6 +64,7 @@ class Profile(models.Model):
     fcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
     cumulative_ship_level = models.PositiveIntegerField(default=0)
     points = models.DecimalField(default=0.0, max_digits=12, decimal_places=10)
+    last_seen = models.DateTimeField(auto_now_add=True)
     objects = ProfileModelManager()
 
     def save(self, force_insert=False, force_update=False, using=None,

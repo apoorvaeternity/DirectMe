@@ -2,6 +2,7 @@ from random import randint
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils import timezone
 from requests.exceptions import HTTPError
 from rest_framework import generics
 from rest_framework import status
@@ -145,6 +146,10 @@ class UserView(APIView):
     serializer_class = UserProfileSerializer
 
     def get(self, request, *args, **kwargs):
+
+        profile = request.user.profile
+        Profile.objects.update_last_seen(profile)
+
         DockChart.objects.undock_timedout(request.user.id)
         serializer = self.serializer_class(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
