@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from core.models import ShipStore, Version, Dock, Ship, Port, DockChart
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
     DockPirateIslandSerializer, PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, \
-    UpdateShipSerializer, BuyShipSerializer
+    UpgradeShipSerializer, BuyShipSerializer
 
 
 class BuyShipView(APIView):
@@ -175,7 +175,7 @@ class UpdateShipView(APIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = UpdateShipSerializer
+    serializer_class = UpgradeShipSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data, context={'request': request})

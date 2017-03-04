@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^fine/$', views.FineView.as_view(), name='fine'),
     url(r'^undock/$', views.UndockShipView.as_view(), name='undock'),
     url(r'^dock/$', views.DockShipView.as_view(), name='dock-ship'),
-    url(r'^update-ship/$', views.UpdateShipView.as_view(), name='update-ship'),
+    url(r'^upgrade-ship/$', views.UpdateShipView.as_view(), name='upgrade-ship'),
     url(r'^pirate-island/$', views.DockPirateIsland.as_view(), name='pirate-island'),
     url(r'^buy-ship/$', views.BuyShipView.as_view(), name='buy-ship'),
 ]
