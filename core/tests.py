@@ -130,7 +130,7 @@ class DockPirateIslandTests(APITestCase):
 
 
 class UpdateShipTests(APITestCase):
-    url = reverse('update-ship')
+    url = reverse('upgrade-ship')
 
     def test_ship_exists(self):
         """Ensure that ship exists"""
@@ -207,7 +207,7 @@ class UpdateShipTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['non_field_errors'][0], "Incorrect ship ID")
 
-    def test_update_ship(self):
+    def test_upgrade_ship(self):
         """Ensure that the sufficient items are present for updating ship"""
 
         user = User.objects._create_user(username='some_username', password='some_password',
@@ -226,6 +226,24 @@ class UpdateShipTests(APITestCase):
 
         ship = Ship.objects.get(user=user, is_active=True)
         self.assertNotEqual(ship.id, ship_id)
+
+    def test_max_ship(self):
+        """Ensure that ship cannot be upgraded after the last ship is reached"""
+
+        user = User.objects._create_user(username='some_username', password='some_password',
+                                         email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        ship = Ship.objects.get(user=user, is_active=True)
+        ship.ship_store = ShipStore.objects.order_by('buy_cost').last()
+        ship.save()
+
+        data = {'ship_id': ship.id}
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], "Ship cannot be upgraded.")
 
 
 class BuyShipTests(APITestCase):

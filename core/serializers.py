@@ -169,7 +169,7 @@ class SuggestionListSerializer(serializers.Serializer):
         return attrs
 
 
-class UpdateShipSerializer(serializers.Serializer):
+class UpgradeShipSerializer(serializers.Serializer):
     ship_id = serializers.IntegerField(required=True)
 
     def validate(self, attrs):
@@ -186,6 +186,10 @@ class UpdateShipSerializer(serializers.Serializer):
 
         if not ship.check_inventory(user):
             raise serializers.ValidationError('Insufficient items')
+
+        ship_store = Ship.objects.get(pk=ship_id).ship_store
+        if ShipStore.objects.order_by('buy_cost').last() == ship_store:
+            raise serializers.ValidationError('Ship cannot be upgraded.')
 
         return attrs
 
