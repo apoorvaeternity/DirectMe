@@ -41,6 +41,7 @@ class BuyShipSerializer(serializers.Serializer):
 
     def save(self):
         dock_id = self.validated_data['dock_id']
+        # TODO: add cumulative ship level
         dock = Dock.objects.get(pk=dock_id)
         dock.allocate_raft()
 
@@ -193,13 +194,19 @@ class UpgradeShipSerializer(serializers.Serializer):
 
         return attrs
 
-    def updateShip(self):
+    def update_ship(self):
         user = self.context['request'].user
         ship_id = self.validated_data['ship_id']
         ship = Ship.objects.get(pk=ship_id)
         next_ship_store = ShipUpgrade.objects.consume_inventory(ship, user)
         next_ship_instance = ship.update(next_ship_store=next_ship_store, user=user)
         Profile.objects.add_exp(user.profile, next_ship_store.experience_gain)
+        # Update cumulative ship level
+
+        level_delta = next_ship_instance.ship_store.ship_id - ship.ship_store.ship_id
+        user.profile.cumulative_ship_level += level_delta
+        user.profile.save()
+
         Dock.objects.update_ship_docked(ship, next_ship_instance)
 
 

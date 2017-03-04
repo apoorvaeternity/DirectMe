@@ -5,7 +5,7 @@ from .models import ShipStore, Level, ShipUpgrade, Item, Island, Slot, Version, 
 
 
 class ShipStoreModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'experience_gain', 'cost_multiplier', 'buy_cost')
+    list_display = ('name', 'ship_id', 'experience_gain', 'cost_multiplier', 'buy_cost')
 
 
 class LevelModelAdmin(admin.ModelAdmin):

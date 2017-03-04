@@ -180,7 +180,7 @@ class UpdateShipView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.updateShip()
+            serializer.update_ship()
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

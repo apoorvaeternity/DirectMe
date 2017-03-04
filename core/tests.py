@@ -129,7 +129,7 @@ class DockPirateIslandTests(APITestCase):
         self.assertEqual(dock_chart.ship.ship_store.name, ship.ship_store.name)
 
 
-class UpdateShipTests(APITestCase):
+class UpgradeShipTests(APITestCase):
     url = reverse('upgrade-ship')
 
     def test_ship_exists(self):
@@ -216,6 +216,8 @@ class UpdateShipTests(APITestCase):
 
         ship_id = Ship.objects.get(user=user).id
 
+        initial_cumulative_level = user.profile.cumulative_ship_level
+
         data = {'ship_id': ship_id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         response = self.client.post(self.url, data)
@@ -226,6 +228,10 @@ class UpdateShipTests(APITestCase):
 
         ship = Ship.objects.get(user=user, is_active=True)
         self.assertNotEqual(ship.id, ship_id)
+
+        user = User.objects.get(username='some_username')
+        final_cumulative_level = user.profile.cumulative_ship_level
+        self.assertGreater(final_cumulative_level, initial_cumulative_level)
 
     def test_max_ship(self):
         """Ensure that ship cannot be upgraded after the last ship is reached"""

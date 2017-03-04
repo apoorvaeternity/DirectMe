@@ -57,6 +57,7 @@ class Profile(models.Model):
     experience = models.IntegerField(default=10)
     island = models.ForeignKey(Island, default=None, null=True)
     fcm_token = models.CharField(max_length=255, default=None, null=True, unique=True)
+    cumulative_ship_level = models.PositiveIntegerField(default=0)
     points = models.DecimalField(default=0.0, max_digits=12, decimal_places=10)
     objects = ProfileModelManager()
 
