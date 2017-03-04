@@ -100,6 +100,10 @@ class DocksListSerializer(serializers.ModelSerializer):
     port_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField('get_ship_status')
+    user_id = serializers.IntegerField(source='user.id')
+    dock_id = serializers.IntegerField(source='id')
+    ship_id = serializers.IntegerField(source='ship.id')
+    slot_id = serializers.IntegerField(source='slot.id')
 
     def get_name(self, obj):
         if Ship.objects.filter(pk=obj.ship_id).exists():
@@ -136,7 +140,8 @@ class DocksListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dock
-        fields = ('__all__')
+        fields = ('user_id', 'name', 'ship_image', 'island_id', 'park_time', 'port_id', 'username', 'status', 'dock_id',
+                  'ship_id', 'slot_id')
 
 
 class SuggestionListSerializer(serializers.Serializer):
