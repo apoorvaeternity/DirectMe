@@ -188,10 +188,10 @@ class PortModelManager(models.Manager):
         """
         Creates parking and non parking ports of a user
         """
-        for _ in range(3):
+        for _ in range(2):
             self._create_parking_port(user=user)
 
-        for _ in range(2):
+        for _ in range(3):
             self._create_non_parking_port(user=user)
 
     def get_parking_ports(self, user):

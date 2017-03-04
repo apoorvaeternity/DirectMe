@@ -242,8 +242,8 @@ class GetSuggestionTests(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(len(response.data[0]), 4)
         self.assertEqual(response.data[0]['user_id'], user2.id)
-        self.assertEqual(response.data[0]['parking'], 3)
-        self.assertEqual(response.data[0]['non_parking'], 2)
+        self.assertEqual(response.data[0]['parking'], 2)
+        self.assertEqual(response.data[0]['non_parking'], 3)
         self.assertEqual(response.data[0]['name'], 'some_username2')
 
 
