@@ -14,7 +14,7 @@ class BuyShipSerializer(serializers.Serializer):
         user = self.context['request'].user
         ship_id = attrs['ship_id']
         pay_type = attrs['pay_type']
-
+        # TODO: Check whether dock is locked or not
         dock = Dock.objects.filter(user=user, ship_id=None).first()
         if dock is None:
             raise serializers.ValidationError("No empty dock.")

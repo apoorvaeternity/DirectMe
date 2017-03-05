@@ -255,49 +255,6 @@ class UpgradeShipTests(APITestCase):
 class BuyShipTests(APITestCase):
     url = reverse('buy-ship')
 
-    def test_incorrect_dock_id(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
-                                        email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
-        docks = Dock.objects.filter(user=user)
-        # Create incorrect dock_id
-        dock_id = 0
-        for dock in docks:
-            dock_id += dock.id
-
-        data = {'dock_id': dock_id}
-        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Incorrect Dock ID")
-
-    def test_lock_docked(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
-                                        email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
-        dock = Dock.objects.filter(user=user, ship=None).first()
-
-        data = {'dock_id': dock.id}
-        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Dock is not unlocked")
-
-    def test_dock_already_occupied(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
-                                        email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
-        dock = Dock.objects.filter(user=user).exclude(ship=None).first()
-
-        data = {'dock_id': dock.id}
-        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Dock is already occupied")
-
     def test_insufficient_gold(self):
         user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')

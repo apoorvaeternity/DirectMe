@@ -139,7 +139,7 @@
       "experience_gain": 0,
       "image": "Student_ID.jpg",
       "buy_cost": 1000,
-      "ship_id": 0
+      "ship_lvl": 0
     }
   },
   {
@@ -151,7 +151,7 @@
       "experience_gain": 1000,
       "image": "Student_ID_7U4gNxw.jpg",
       "buy_cost": 9999999,
-      "ship_id": 1
+      "ship_lvl": 1
     }
   },
   {
