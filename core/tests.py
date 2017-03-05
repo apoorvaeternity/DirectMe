@@ -604,3 +604,19 @@ class DockListViewTest(APITestCase):
         self.assertEqual(response.data[1]['name'], ship_name)
         self.assertEqual(response.data[1]['ship_image'], ship_image)
         self.assertEqual(response.data[1]['status'], ship_status)
+
+
+    def test_null_ship_status(self):
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for dock in response.data:
+            if dock['ship_id'] is None:
+                self.assertEqual(dock['status'], None)
+            else:
+                self.assertEqual(dock['status'], 'Idle')

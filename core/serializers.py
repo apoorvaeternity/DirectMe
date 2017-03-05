@@ -117,7 +117,10 @@ class DocksListSerializer(serializers.ModelSerializer):
     def get_ship_status(self, obj):
         if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
             return "Busy"
-        return "Idle"
+        elif obj.ship_id is None:
+            return None
+        else:
+            return "Idle"
 
     def get_island_id(self, obj):
         if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
@@ -322,6 +325,8 @@ class ShipsListSerializer(serializers.ModelSerializer):
     def get_ship_status(self, obj):
         if DockChart.objects.filter(ship_id=obj, end_time=None).exists():
             return "Busy"
+        elif obj is None:
+            return None
         return "Idle"
 
     def get_island_id(self, obj):
