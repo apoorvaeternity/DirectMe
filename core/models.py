@@ -325,8 +325,8 @@ class ShipStore(models.Model):
     image = models.ImageField(upload_to=upload_ship_image)
     # Buy cost in gold coins
     buy_cost = models.IntegerField()
-    # This is not the primary key, this just helps to order the ships according to their value
-    ship_id = models.IntegerField(default=None, null=True, unique=True)
+    # This just helps to order the ships according to their value
+    ship_lvl = models.IntegerField(default=None, null=True, unique=True)
 
     objects = ShipStoreModelManager()
 
