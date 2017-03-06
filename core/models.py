@@ -25,13 +25,29 @@ class DockModelManager(models.Manager):
         dock_instance.ship = current_ship
         dock_instance.save()
 
+    def buy_slot(self, dock, user):
+        dock.status = 'unlocked'
+        required_gold = dock.slot.gold
+        from player.models import Inventory, Item
+        Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Gold'), value=required_gold)
+        dock.save()
+
+    def check_exp(self, user):
+        docks = Dock.objects.filter(user=user, status='locked')
+        exp = user.profile.experience
+        for dock in docks:
+            required_exp = dock.slot.unlock_level.experience_required
+            if exp >= required_exp:
+                dock.status = 'buy'
+                dock.save()
+
 
 # Garage
 class Dock(models.Model):
     user = models.ForeignKey(User, related_name='dock')
     slot = models.ForeignKey('Slot', related_name='slot')
     ship = models.ForeignKey('Ship', default=None, null=True)
-
+    status = models.CharField(default='locked', max_length=10)
     objects = DockModelManager()
 
     def allocate_raft(self):
@@ -300,6 +316,7 @@ class ShipStoreModelManager(models.Manager):
         raft = ShipStore.objects.order_by('buy_cost').first()
         ship = Ship.objects.create(ship_store=raft, user=user)
         dock = Dock.objects.unlock_first_dock(user=user)
+        dock.status = 'unlocked'
         dock.ship = ship
         dock.save()
 
@@ -364,6 +381,7 @@ class ShipUpgrade(models.Model):
 
 class Slot(models.Model):
     unlock_level = models.ForeignKey('Level')
+    gold = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.id) + " : " + str(self.unlock_level)
