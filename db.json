@@ -158,14 +158,16 @@
     "model": "core.slot",
     "pk": 1,
     "fields": {
-      "unlock_level": 1
+      "unlock_level": 1,
+      "gold":0
     }
   },
   {
     "model": "core.slot",
     "pk": 2,
     "fields": {
-      "unlock_level": 3
+      "unlock_level": 3,
+      "gold":2000
     }
   }
 ]

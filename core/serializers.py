@@ -143,11 +143,12 @@ class DocksListSerializer(serializers.ModelSerializer):
     park_time = serializers.SerializerMethodField()
     port_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField('get_ship_status')
+    ship_status = serializers.SerializerMethodField()
     user_id = serializers.IntegerField(source='user.id')
     dock_id = serializers.IntegerField(source='id')
     ship_id = serializers.IntegerField(source='ship.id')
     slot_id = serializers.IntegerField(source='slot.id')
+    dock_status = serializers.CharField(source='status')
 
     def get_name(self, obj):
         if Ship.objects.filter(pk=obj.ship_id).exists():
@@ -185,10 +186,16 @@ class DocksListSerializer(serializers.ModelSerializer):
             username = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.username
             return username
 
+    def get_user_id(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            user_id = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.id
+            return user_id
+
     class Meta:
         model = Dock
-        fields = ('user_id', 'name', 'ship_image', 'island_id', 'park_time', 'port_id', 'username', 'status', 'dock_id',
-                  'ship_id', 'slot_id')
+        fields = (
+        'user_id', 'name', 'ship_image', 'island_id', 'park_time', 'port_id', 'username', 'ship_status', 'dock_id',
+        'ship_id', 'slot_id', 'dock_status')
 
 
 class SuggestionListSerializer(serializers.Serializer):
@@ -431,3 +438,23 @@ class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
         fields = '__all__'
+
+
+class BuySlotSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        user = self.context['request'].user
+        dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
+        if dock is None:
+            raise serializers.ValidationError("No buyable slot.")
+        user_gold = Inventory.objects.get(user=user, item__name='Gold').count
+        required_gold = dock.slot.gold
+        if user_gold < required_gold:
+            raise serializers.ValidationError('Insufficient gold.')
+        attrs['dock'] = dock
+
+        return attrs
+
+    def save(self, **kwargs):
+        Dock.objects.buy_slot(
+            self.validated_data['dock'], self.context['request'].user
+        )

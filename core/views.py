@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from core.models import ShipStore, Version, Dock, Ship, Port, DockChart
 from core.serializers import ShipStoreSerializer, VersionSerializer, DocksListSerializer, DockShipSerializer, \
     DockPirateIslandSerializer, PortsListSerializer, ShipsListSerializer, FineSerializer, UndockSerializer, \
-    UpgradeShipSerializer, BuyShipSerializer
+    UpgradeShipSerializer, BuyShipSerializer, BuySlotSerializer
 
 
 class BuyShipView(APIView):
@@ -38,6 +38,7 @@ class DocksListView(APIView):
     serializer_class = DocksListSerializer
 
     def get(self, request):
+        Dock.objects.check_exp(request.user)
         DockChart.objects.undock_timedout(user_id=request.user.id)
         ships = get_list_or_404(Dock, user_id=request.user.id)
         serializer = self.serializer_class(ships, many=True)
@@ -195,6 +196,23 @@ class DockPirateIsland(APIView):
     serializer_class = DockPirateIslandSerializer
 
     def post(self, request):
+        serializer = self.serializer_class(data=self.request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BuySlotView(APIView):
+    """
+    Buy a slot
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = BuySlotSerializer
+
+    def get(self, request):
         serializer = self.serializer_class(data=self.request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
