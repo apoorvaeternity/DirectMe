@@ -144,7 +144,7 @@ class DocksListSerializer(serializers.ModelSerializer):
     port_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     ship_status = serializers.SerializerMethodField()
-    user_id = serializers.IntegerField(source='user.id')
+    user_id = serializers.SerializerMethodField()
     dock_id = serializers.IntegerField(source='id')
     ship_id = serializers.IntegerField(source='ship.id')
     slot_id = serializers.IntegerField(source='slot.id')
