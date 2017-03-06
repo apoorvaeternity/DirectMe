@@ -101,7 +101,7 @@ class DocksListSerializer(serializers.ModelSerializer):
     port_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField('get_ship_status')
-    user_id = serializers.IntegerField(source='user.id')
+    user_id = serializers.SerializerMethodField()
     dock_id = serializers.IntegerField(source='id')
     ship_id = serializers.IntegerField(source='ship.id')
     slot_id = serializers.IntegerField(source='slot.id')
@@ -141,6 +141,11 @@ class DocksListSerializer(serializers.ModelSerializer):
         if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
             username = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.username
             return username
+
+    def get_user_id(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            user_id = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.id
+            return user_id
 
     class Meta:
         model = Dock
