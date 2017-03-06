@@ -4,8 +4,8 @@ from random import randint
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Max
-from rest_framework.authtoken.models import Token
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from core.models import Item, Island, Port, Dock
 from core.models import Item, ShipStore
@@ -104,6 +104,11 @@ class InventoryModelManager(models.Manager):
     def add_item(self, user, item, value):
         inventory = Inventory.objects.get(user=user, item=item)
         inventory.count += value
+        inventory.save()
+
+    def sub_item(self, user, item, value):
+        inventory = Inventory.objects.get(user=user, item=item)
+        inventory.count -= value
         inventory.save()
 
 

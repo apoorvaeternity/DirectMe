@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^upgrade-ship/$', views.UpdateShipView.as_view(), name='upgrade-ship'),
     url(r'^pirate-island/$', views.DockPirateIsland.as_view(), name='pirate-island'),
     url(r'^buy-ship/$', views.BuyShipView.as_view(), name='buy-ship'),
+    url(r'^buy-slot/$', views.BuySlotView.as_view(), name='buy-slot'),
 ]
