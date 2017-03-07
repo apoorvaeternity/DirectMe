@@ -591,10 +591,10 @@ class DockListViewTest(APITestCase):
         if DockChart.objects.filter(ship_id=ship_id, end_time=None).exists():
             ship_status = "Busy"
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[1]['ship_id'], ship_id)
-        self.assertEqual(response.data[1]['name'], ship_name)
-        self.assertEqual(response.data[1]['ship_image'], ship_image)
-        self.assertEqual(response.data[1]['ship_status'], ship_status)
+        self.assertEqual(response.data[4]['ship_id'], ship_id)
+        self.assertEqual(response.data[4]['name'], ship_name)
+        self.assertEqual(response.data[4]['ship_image'], ship_image)
+        self.assertEqual(response.data[4]['ship_status'], ship_status)
 
     def test_null_ship_status(self):
         user = User.objects.create_user(username='some_username', password='some_password',
@@ -627,9 +627,9 @@ class BuySlotViewTest(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], 'No buyable slot.')
 
     def test_insufficient_gold(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
+        user = User.objects.create_user(username='some_username22', password='some_password',
                                         email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
+        Profile.objects.create_player(username='some_username22')
 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         Profile.objects.add_exp(user.profile, 10000000)
@@ -651,7 +651,7 @@ class BuySlotViewTest(APITestCase):
         dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
         required_gold = dock.slot.gold
         user_gold = Inventory.objects.get(user=user, item__name='Gold')
-        user_gold.count += required_gold
+        user_gold.count += required_gold+1
         initial_gold = user_gold.count
         user_gold.save()
         response = self.client.get(self.url)
@@ -659,6 +659,3 @@ class BuySlotViewTest(APITestCase):
         final_gold = user_gold.count
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(initial_gold - final_gold, required_gold)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], 'No buyable slot.')

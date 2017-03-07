@@ -18,7 +18,7 @@ class BuyShipSerializer(serializers.Serializer):
             raise serializers.ValidationError("Incorrect ship ID")
         if pay_type not in ['GOLD', 'RESOURCE']:
             raise serializers.ValidationError("Incorrect payment type")
-        # TODO: Check whether dock is locked or not
+
         dock = Dock.objects.filter(user=user, ship_id=None, status='unlocked').first()
         if dock is None:
             raise serializers.ValidationError("No available slot.")

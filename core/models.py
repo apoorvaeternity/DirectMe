@@ -14,12 +14,6 @@ class DockModelManager(models.Manager):
         for slot in Slot.objects.all():
             Dock.objects.create(user=user, slot=slot)
 
-    def unlock_first_dock(self, user):
-        """
-        Returns first unlocked dock
-        """
-        return Dock.objects.filter(user=user).order_by('slot__unlock_level').first()
-
     def update_ship_docked(self, previous_ship, current_ship):
         dock_instance = Dock.objects.get(ship=previous_ship)
         dock_instance.ship = current_ship
@@ -315,7 +309,7 @@ class ShipStoreModelManager(models.Manager):
         """
         raft = ShipStore.objects.order_by('buy_cost').first()
         ship = Ship.objects.create(ship_store=raft, user=user)
-        dock = Dock.objects.unlock_first_dock(user=user)
+        dock = Dock.objects.filter(user=user).first()
         dock.status = 'unlocked'
         dock.ship = ship
         dock.save()

@@ -16,8 +16,9 @@ class ShipUpgardeModelAdmin(admin.ModelAdmin):
     list_display = ('ship_store', 'count', 'item_id')
 
 
+
 class SlotModelAdmin(admin.ModelAdmin):
-    list_display = ('unlock_level', 'id')
+    list_display = ('unlock_level', 'id', 'gold')
 
 
 class VersionModelAdmin(admin.ModelAdmin):
