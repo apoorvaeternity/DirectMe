@@ -191,7 +191,7 @@ class UpgradeShipTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Incorrect ship ID")
 
     def test_ship_active(self):
-        """Ensure that the ship is active"""
+        """Checks whether the ship to be upgraded is an active ship of the user."""
 
         user = User.objects._create_user(username='some_username', password='some_password',
                                          email='some_email@gmail.com')
@@ -269,6 +269,7 @@ class BuyShipTests(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         Profile.objects.add_exp(user.profile, 10000000)
+        # Fetching the details of the docks updates the status of the docks to buy
         docks_url = reverse('docks')
         self.client.get(docks_url)
         dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
@@ -293,6 +294,7 @@ class BuyShipTests(APITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         Profile.objects.add_exp(user.profile, 10000000)
+        # Fetching the details of the docks updates the status of the docks to buy
         docks_url = reverse('docks')
         self.client.get(docks_url)
         dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()

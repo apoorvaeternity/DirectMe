@@ -13,7 +13,7 @@ class BuyShipSerializer(serializers.Serializer):
     def validate(self, attrs):
         user = self.context['request'].user
         ship_id = attrs['ship_id']
-        pay_type = attrs['pay_type']
+        pay_type = attrs['pay_type'].upper()
         if not ShipStore.objects.filter(id=ship_id).exists():
             raise serializers.ValidationError("Incorrect ship ID")
         if pay_type not in ['GOLD', 'RESOURCE']:
@@ -63,17 +63,17 @@ class BuyShipSerializer(serializers.Serializer):
     def save(self):
         user = self.context['request'].user
         ship_id = self.validated_data['ship_id']
-        # TODO: add cumulative ship level
         ship_lvl = ShipStore.objects.get(pk=ship_id).ship_lvl
         Profile.objects.cumulative_ship_level(user=user, level_delta=ship_lvl)
         dock = Dock.objects.filter(user=user, ship_id=None).first()
         ship = Ship.objects.create(ship_store_id=ship_id, user=user)
         dock.ship = ship
         dock.save()
-        if self.validated_data['pay_type'] == 'GOLD':
+        pay_type = self.validated_data['pay_type'].upper()
+        if pay_type == 'GOLD':
             Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Gold'),
                                        value=self.validated_data['buy_cost']['buy_cost__sum'])
-        if self.validated_data['pay_type'] == 'RESOURCE':
+        if pay_type == 'RESOURCE':
             Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Coconut'),
                                        value=self.validated_data['coconut_required']['count__sum'])
             Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Timber'),
