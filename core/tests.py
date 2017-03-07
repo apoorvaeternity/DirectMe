@@ -627,9 +627,9 @@ class BuySlotViewTest(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], 'No buyable slot.')
 
     def test_insufficient_gold(self):
-        user = User.objects.create_user(username='some_username22', password='some_password',
+        user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username22')
+        Profile.objects.create_player(username='some_username')
 
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         Profile.objects.add_exp(user.profile, 10000000)
@@ -651,7 +651,7 @@ class BuySlotViewTest(APITestCase):
         dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
         required_gold = dock.slot.gold
         user_gold = Inventory.objects.get(user=user, item__name='Gold')
-        user_gold.count += required_gold+1
+        user_gold.count += required_gold
         initial_gold = user_gold.count
         user_gold.save()
         response = self.client.get(self.url)
