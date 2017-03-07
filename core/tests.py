@@ -591,10 +591,10 @@ class DockListViewTest(APITestCase):
         if DockChart.objects.filter(ship_id=ship_id, end_time=None).exists():
             ship_status = "Busy"
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[1]['ship_id'], ship_id)
-        self.assertEqual(response.data[1]['name'], ship_name)
-        self.assertEqual(response.data[1]['ship_image'], ship_image)
-        self.assertEqual(response.data[1]['ship_status'], ship_status)
+        self.assertEqual(response.data[4]['ship_id'], ship_id)
+        self.assertEqual(response.data[4]['name'], ship_name)
+        self.assertEqual(response.data[4]['ship_image'], ship_image)
+        self.assertEqual(response.data[4]['ship_status'], ship_status)
 
     def test_null_ship_status(self):
         user = User.objects.create_user(username='some_username', password='some_password',
@@ -659,6 +659,3 @@ class BuySlotViewTest(APITestCase):
         final_gold = user_gold.count
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(initial_gold - final_gold, required_gold)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], 'No buyable slot.')

@@ -103,7 +103,7 @@ class Profile(models.Model):
 class InventoryModelManager(models.Manager):
     def create_initial_inventory(self, user):
         for item in Item.objects.all():
-            Inventory.objects.create(user=user, item=item, count=10)
+            Inventory.objects.create(user=user, item=item, count=0)
 
     def add_item(self, user, item, value):
         inventory = Inventory.objects.get(user=user, item=item)
