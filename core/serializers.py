@@ -64,6 +64,8 @@ class BuyShipSerializer(serializers.Serializer):
         user = self.context['request'].user
         ship_id = self.validated_data['ship_id']
         # TODO: add cumulative ship level
+        ship_lvl = ShipStore.objects.get(pk=ship_id).ship_lvl
+        Profile.objects.cumulative_ship_level(user=user, level_delta=ship_lvl)
         dock = Dock.objects.filter(user=user, ship_id=None).first()
         ship = Ship.objects.create(ship_store_id=ship_id, user=user)
         dock.ship = ship
@@ -250,8 +252,7 @@ class UpgradeShipSerializer(serializers.Serializer):
         # Update cumulative ship level
 
         level_delta = next_ship_instance.ship_store.ship_lvl - ship.ship_store.ship_lvl
-        user.profile.cumulative_ship_level += level_delta
-        user.profile.save()
+        Profile.objects.cumulative_ship_level(user=user, level_delta=level_delta)
 
         Dock.objects.update_ship_docked(ship, next_ship_instance)
 

@@ -55,6 +55,10 @@ class ProfileModelManager(models.Manager):
         profile.last_seen = timezone.now()
         profile.save()
 
+    def cumulative_ship_level(self, user, level_delta):
+        user.profile.cumulative_ship_level += level_delta
+        user.profile.save()
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User)
