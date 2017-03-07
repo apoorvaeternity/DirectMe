@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart
-from player.models import Profile, Inventory
+from player.models import Profile, Inventory, Item
 
 
 def setUpModule():
@@ -191,14 +191,17 @@ class UpgradeShipTests(APITestCase):
         self.assertEqual(response.data['non_field_errors'][0], "Incorrect ship ID")
 
     def test_ship_active(self):
-        """Ensure that the ship is active"""
+        """Checks whether the ship to be upgraded is an active ship of the user."""
 
         user = User.objects._create_user(username='some_username', password='some_password',
                                          email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
 
         ship = Ship.objects.get(user=user)
-
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Coconut'), value=10000)
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Banana'), value=10000)
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Bamboo'), value=10000)
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Timber'), value=10000)
         data = {'ship_id': ship.id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         response = self.client.post(self.url, data)
@@ -217,13 +220,17 @@ class UpgradeShipTests(APITestCase):
         ship_id = Ship.objects.get(user=user).id
 
         initial_cumulative_level = user.profile.cumulative_ship_level
-
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Coconut'), value=10000)
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Banana'), value=10000)
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Bamboo'), value=10000)
+        Inventory.objects.add_item(user=user, item=Item.objects.get(name='Timber'), value=10000)
         data = {'ship_id': ship_id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         response = self.client.post(self.url, data)
 
         ship = Ship.objects.get(id=ship_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         self.assertEqual(ship.is_active, False)
 
         ship = Ship.objects.get(user=user, is_active=True)
@@ -255,99 +262,83 @@ class UpgradeShipTests(APITestCase):
 class BuyShipTests(APITestCase):
     url = reverse('buy-ship')
 
-    def test_incorrect_dock_id(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
-                                        email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
-        docks = Dock.objects.filter(user=user)
-        # Create incorrect dock_id
-        dock_id = 0
-        for dock in docks:
-            dock_id += dock.id
-
-        data = {'dock_id': dock_id}
-        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Incorrect Dock ID")
-
-    def test_lock_docked(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
-                                        email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
-        dock = Dock.objects.filter(user=user, ship=None).first()
-
-        data = {'dock_id': dock.id}
-        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Dock is not unlocked")
-
-    def test_dock_already_occupied(self):
-        user = User.objects.create_user(username='some_username', password='some_password',
-                                        email='some_email@gmail.com')
-        Profile.objects.create_player(username='some_username')
-        dock = Dock.objects.filter(user=user).exclude(ship=None).first()
-
-        data = {'dock_id': dock.id}
-        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Dock is already occupied")
-
     def test_insufficient_gold(self):
         user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
-        dock = Dock.objects.filter(user=user, ship=None).first()
 
-        # Increment players experience
-        required_exp = dock.slot.unlock_level.experience_required
-        user.profile.experience = required_exp
-        user.profile.save()
-
-        user.refresh_from_db()
-
-        data = {'dock_id': dock.id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
+        Profile.objects.add_exp(user.profile, 10000000)
+        # Fetching the details of the docks updates the status of the docks to buy
+        docks_url = reverse('docks')
+        self.client.get(docks_url)
+        dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
+        required_gold = dock.slot.gold
+        user_gold = Inventory.objects.get(user=user, item__name='Gold')
+        user_gold.count += required_gold
+        user_gold.save()
+        buy_slot_url = reverse('buy-slot')
+        response = self.client.get(buy_slot_url)
+        user_gold.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+        data = {'ship_id': 2, 'pay_type': 'GOLD'}
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "User doesn't have sufficient Gold")
+        self.assertEqual(response.data['non_field_errors'][0], 'User doesn\'t have sufficient Gold')
+
+    def test_insufficient_resource(self):
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+        Profile.objects.add_exp(user.profile, 10000000)
+        # Fetching the details of the docks updates the status of the docks to buy
+        docks_url = reverse('docks')
+        self.client.get(docks_url)
+        dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
+        required_gold = dock.slot.gold
+        user_gold = Inventory.objects.get(user=user, item__name='Gold')
+        user_gold.count += required_gold
+        user_gold.save()
+        buy_slot_url = reverse('buy-slot')
+        response = self.client.get(buy_slot_url)
+        user_gold.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        data = {'ship_id': 2, 'pay_type': 'RESOURCE'}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'User has insufficient Coconut,Timber,Banana,Bamboo')
 
     def test_buy(self):
         user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
-        dock = Dock.objects.filter(user=user, ship=None).first()
 
-        # Increment player's experience
-        required_exp = dock.slot.unlock_level.experience_required
-        user.profile.experience = required_exp
-        user.profile.save()
-
-        user.refresh_from_db()
-
-        # Increment player's gold
-        required_gold = ShipStore.objects.order_by('buy_cost').first().buy_cost
-
-        user_gold = Inventory.objects.filter(user=user, item__name__icontains='Gold').first()
-        user_gold.count = required_gold
-        user_gold.save()
-
-        data = {'dock_id': dock.id}
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
-        response = self.client.post(self.url, data)
-
-        dock.refresh_from_db()
+        Profile.objects.add_exp(user.profile, 10000000)
+        docks_url = reverse('docks')
+        self.client.get(docks_url)
+        dock = Dock.objects.filter(ship=None, status='buy').order_by('slot__gold').first()
+        required_gold = dock.slot.gold
+        user_gold = Inventory.objects.get(user=user, item__name='Gold')
+        user_gold.count += required_gold
+        user_gold.save()
+        buy_slot_url = reverse('buy-slot')
+        response = self.client.get(buy_slot_url)
+        user_gold.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = {'ship_id': 2, 'pay_type': 'GOLD'}
+        user_gold = Inventory.objects.get(user=user, item__name='Gold')
+        # Give lots of gold to buy ship
+        user_gold.count += 1000000000
+        user_gold.save()
         user_gold.refresh_from_db()
 
+        response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(dock.ship != None, True)
-        self.assertEqual(user_gold.count, 0)
 
 
 class DockShipTest(APITestCase):

@@ -1,49 +1,87 @@
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from rest_framework import serializers
 
-from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, FineLog, Level, Island
+from core.models import ShipStore, ShipUpgrade, Version, DockChart, Dock, Port, Ship, FineLog, Island, Item
 from player.models import Profile
 
 
 class BuyShipSerializer(serializers.Serializer):
-    dock_id = serializers.IntegerField(required=True)
+    ship_id = serializers.IntegerField(required=True)
+    pay_type = serializers.CharField(required=True)
 
     def validate(self, attrs):
         user = self.context['request'].user
-        dock_id = attrs['dock_id']
-
-        dock = Dock.objects.filter(user=user, pk=dock_id).first()
+        ship_id = attrs['ship_id']
+        pay_type = attrs['pay_type'].upper()
+        if not ShipStore.objects.filter(id=ship_id).exists():
+            raise serializers.ValidationError("Incorrect ship ID")
+        if pay_type not in ['GOLD', 'RESOURCE']:
+            raise serializers.ValidationError("Incorrect payment type")
+        # TODO: Check whether dock is locked or not
+        dock = Dock.objects.filter(user=user, ship_id=None, status='unlocked').first()
         if dock is None:
-            raise serializers.ValidationError("Incorrect Dock ID")
-        # Calculate user's level
-        user_experience = user.profile.experience
-        user_level = Level.objects.filter(experience_required__lte=user_experience).order_by(
-            '-experience_required').first().level_number
-
-        # Check if dock is unlocked
-        print(dock.slot.unlock_level.level_number)
-        print(user_level)
-        if dock.slot.unlock_level.level_number > user_level:
-            raise serializers.ValidationError("Dock is not unlocked")
-
-        # Check if dock is vacant or not
-        if dock.ship is not None:
-            raise serializers.ValidationError("Dock is already occupied")
+            raise serializers.ValidationError("No available slot.")
+        ship_lvl = ShipStore.objects.get(id=ship_id).ship_lvl
 
         # Check if user has sufficient funds to buy raft or not
-        from player.models import Inventory
-        user_gold_count = Inventory.objects.filter(user=user, item__name__icontains='Gold').first().count
-        buy_cost = ShipStore.objects.order_by('buy_cost').first().buy_cost
-        if user_gold_count < buy_cost:
-            raise serializers.ValidationError("User doesn't have sufficient Gold")
+        if pay_type == 'GOLD':
+            user_gold = Inventory.objects.get(user=user, item__name='Gold').count
+            buy_cost = ShipStore.objects.filter(ship_lvl__lte=ship_lvl).aggregate(Sum('buy_cost'))
+            attrs['buy_cost'] = buy_cost
+            if user_gold < buy_cost['buy_cost__sum']:
+                raise serializers.ValidationError("User doesn't have sufficient Gold")
+
+        if pay_type == 'RESOURCE':
+            coconut_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=ship_lvl,
+                                                          item_id__name='Coconut').aggregate(Sum('count'))
+            timber_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=ship_lvl,
+                                                         item_id__name='Timber').aggregate(Sum('count'))
+            banana_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=ship_lvl,
+                                                         item_id__name='Banana').aggregate(Sum('count'))
+            bamboo_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=ship_lvl,
+                                                         item_id__name='Bamboo').aggregate(Sum('count'))
+            attrs['coconut_required'] = coconut_required
+            attrs['timber_required'] = timber_required
+            attrs['banana_required'] = banana_required
+            attrs['bamboo_required'] = bamboo_required
+            user_items = Inventory.objects.filter(user=user)
+            insufficient = []
+            if user_items.get(item__name='Coconut').count < coconut_required['count__sum']:
+                insufficient.append('Coconut')
+            if user_items.get(item__name='Timber').count < timber_required['count__sum']:
+                insufficient.append('Timber')
+            if user_items.get(item__name='Banana').count < banana_required['count__sum']:
+                insufficient.append('Banana')
+            if user_items.get(item__name='Bamboo').count < bamboo_required['count__sum']:
+                insufficient.append('Bamboo')
+            if len(insufficient):
+                raise serializers.ValidationError('User has insufficient ' + ','.join(insufficient))
 
         return attrs
 
     def save(self):
-        dock_id = self.validated_data['dock_id']
-        # TODO: add cumulative ship level
-        dock = Dock.objects.get(pk=dock_id)
-        dock.allocate_raft()
+        user = self.context['request'].user
+        ship_id = self.validated_data['ship_id']
+        ship_lvl = ShipStore.objects.get(pk=ship_id).ship_lvl
+        Profile.objects.cumulative_ship_level(user=user, level_delta=ship_lvl)
+        dock = Dock.objects.filter(user=user, ship_id=None).first()
+        ship = Ship.objects.create(ship_store_id=ship_id, user=user)
+        dock.ship = ship
+        dock.save()
+        pay_type = self.validated_data['pay_type'].upper()
+        if pay_type == 'GOLD':
+            Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Gold'),
+                                       value=self.validated_data['buy_cost']['buy_cost__sum'])
+        if pay_type == 'RESOURCE':
+            Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Coconut'),
+                                       value=self.validated_data['coconut_required']['count__sum'])
+            Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Timber'),
+                                       value=self.validated_data['timber_required']['count__sum'])
+            Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Banana'),
+                                       value=self.validated_data['banana_required']['count__sum'])
+            Inventory.objects.sub_item(user=user, item=Item.objects.get(name='Bamboo'),
+                                       value=self.validated_data['bamboo_required']['count__sum'])
 
 
 class DockPirateIslandSerializer(serializers.Serializer):
@@ -151,8 +189,8 @@ class DocksListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dock
         fields = (
-        'user_id', 'name', 'ship_image', 'island_id', 'park_time', 'port_id', 'username', 'ship_status', 'dock_id',
-        'ship_id', 'slot_id', 'dock_status')
+            'user_id', 'name', 'ship_image', 'island_id', 'park_time', 'port_id', 'username', 'ship_status', 'dock_id',
+            'ship_id', 'slot_id', 'dock_status')
 
 
 class SuggestionListSerializer(serializers.Serializer):
@@ -213,9 +251,8 @@ class UpgradeShipSerializer(serializers.Serializer):
         Profile.objects.add_exp(user.profile, next_ship_store.experience_gain)
         # Update cumulative ship level
 
-        level_delta = next_ship_instance.ship_store.ship_id - ship.ship_store.ship_id
-        user.profile.cumulative_ship_level += level_delta
-        user.profile.save()
+        level_delta = next_ship_instance.ship_store.ship_lvl - ship.ship_store.ship_lvl
+        Profile.objects.cumulative_ship_level(user=user, level_delta=level_delta)
 
         Dock.objects.update_ship_docked(ship, next_ship_instance)
 
