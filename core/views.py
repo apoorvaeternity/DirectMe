@@ -105,8 +105,8 @@ class ShipsList(APIView):
     serializer_class = ShipStoreSerializer
 
     def get(self, request):
-        ships = ShipStore.objects.all()
-        serializer = self.serializer_class(ships, many=True)
+        ships = ShipStore.objects.all().order_by('ship_lvl')
+        serializer = self.serializer_class(ships,many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
