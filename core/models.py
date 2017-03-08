@@ -68,9 +68,9 @@ class DockChartModelManager(models.Manager):
         dock_chart.save()
         return dock_chart
 
-    def undock_ship(self, ship):
+    def undock_ship(self, ship, end_time=timezone.now()):
         dock_chart = DockChart.objects.filter(ship=ship, end_time=None).first()
-        dock_chart.end_time = timezone.now()
+        dock_chart.end_time = end_time
         dock_chart.is_success = True
         dock_chart.save()
 
@@ -95,7 +95,7 @@ class DockChartModelManager(models.Manager):
             for dock in dock_chart:
                 endtime = dock.start_time + timezone.timedelta(minutes=30)
                 if timezone.now() >= endtime:
-                    self.undock_ship(dock.ship)
+                    self.undock_ship(dock.ship, endtime)
 
     def allocate_pirate_port(self, ship):
         pirate_ports = Port.objects.filter(type__ownable=False)
