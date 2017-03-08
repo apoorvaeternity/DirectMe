@@ -14,6 +14,9 @@ before_script:
   - psql -c "CREATE DATABASE direct_me;" -U postgres
   - python manage.py migrate
 
+env:
+ - DJANGO_SETTINGS_MODULE=direct_me.settings.development
+
 script:
   - OPBEAT_DISABLE_SEND=true python manage.py test
   - OPBEAT_DISABLE_SEND=true coverage run --source='.' manage.py test
