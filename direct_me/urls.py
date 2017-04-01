@@ -28,5 +28,5 @@ urlpatterns = [
     url('', include('social_django.urls', namespace='social'))
 ]
 
-if 'IS_HEROKU' not in os.environ:
+if 'SECRET_KEY' not in os.environ:  # Uses SECRET_KEY environment variable to check whether project is under production.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
