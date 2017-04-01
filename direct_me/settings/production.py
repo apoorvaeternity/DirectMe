@@ -2,7 +2,7 @@ import dj_database_url
 
 from .base import *
 
-ALLOWED_HOSTS = ['direct-me.herokuapp.com']
+ALLOWED_HOSTS = ['dm.silive.in']
 
 DEBUG = False
 
