@@ -26,3 +26,15 @@ OPBEAT = {
     'APP_ID': os.environ.get('OPBEAT_APP_ID'),
     'SECRET_TOKEN': os.environ.get('OPBEAT_SECRET_TOKEN'),
 }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'direct_me',
+        'ATOMIC_REQUESTS': True,
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
+    }
+}
