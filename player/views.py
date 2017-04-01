@@ -17,7 +17,8 @@ from core.models import Port, DockChart
 from core.serializers import SuggestionListSerializer
 from player.models import Profile
 from player.serializers import SocialSerializer, LeaderboardSerializer
-
+import hashlib
+import urllib.parse
 
 @api_view(http_method_names=['POST'])
 @permission_classes([AllowAny])
@@ -205,9 +206,10 @@ class SuggestionListView(APIView):
 
     serializer_class = SuggestionListSerializer
 
-    def response_format(self, result, user, parking_ports, non_parking_ports):
+    def response_format(self, result, user, parking_ports, non_parking_ports, gravatar):
         result.append({
             'name': user.username,
+            'gravatar': gravatar,
             'user_id': user.id,
             'parking': parking_ports,
             'non_parking': non_parking_ports
@@ -242,9 +244,13 @@ class SuggestionListView(APIView):
                 for port in non_parking_ports:
                     if port.is_idle():
                         no_of_non_parking_ports += 1
+                gravatar = "https://www.gravatar.com/avatar/%s?%s" % (
+                    hashlib.md5(user.email.lower().encode('utf-8')).hexdigest(),
+                    urllib.parse.urlencode({'s': str(40), 'd': 'identicon'})
+                )
 
                 if not (no_of_non_parking_ports == 0 or non_parking_ports == 0):
-                    self.response_format(response, user, no_of_parking_ports, no_of_non_parking_ports)
+                    self.response_format(response, user, no_of_parking_ports, no_of_non_parking_ports, gravatar)
             return Response(response, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
