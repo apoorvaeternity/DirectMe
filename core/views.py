@@ -40,7 +40,7 @@ class DocksListView(APIView):
     def get(self, request):
         Dock.objects.check_exp(request.user)
         DockChart.objects.undock_timedout(user_id=request.user.id)
-        ships = get_list_or_404(Dock, user_id=request.user.id)
+        ships = get_list_or_404(Dock.objects.order_by('id'), user_id=request.user.id)
         serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -106,7 +106,7 @@ class ShipsList(APIView):
 
     def get(self, request):
         ships = ShipStore.objects.all().order_by('ship_lvl')
-        serializer = self.serializer_class(ships,many=True)
+        serializer = self.serializer_class(ships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

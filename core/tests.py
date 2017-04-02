@@ -591,10 +591,10 @@ class DockListViewTest(APITestCase):
         if DockChart.objects.filter(ship_id=ship_id, end_time=None).exists():
             ship_status = "Busy"
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[4]['ship_id'], ship_id)
-        self.assertEqual(response.data[4]['name'], ship_name)
-        self.assertEqual(response.data[4]['ship_image'], ship_image)
-        self.assertEqual(response.data[4]['ship_status'], ship_status)
+        self.assertEqual(response.data[0]['ship_id'], ship_id)
+        self.assertEqual(response.data[0]['name'], ship_name)
+        self.assertEqual(response.data[0]['ship_image'], ship_image)
+        self.assertEqual(response.data[0]['ship_status'], ship_status)
 
     def test_null_ship_status(self):
         user = User.objects.create_user(username='some_username', password='some_password',
