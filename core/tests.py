@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart
+from django.db.models import Sum
+from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart, ShipUpgrade
 from player.models import Profile, Inventory, Item
 
 
@@ -659,3 +659,37 @@ class BuySlotViewTest(APITestCase):
         final_gold = user_gold.count
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(initial_gold - final_gold, required_gold)
+
+
+class ShipsListViewTest(APITestCase):
+    url = reverse('ship-list')
+
+    def test_required_inventory(self):
+        user = User.objects.create_user(username='some_username', password='some_password',
+                                        email='some_email@gmail.com')
+        Profile.objects.create_player(username='some_username')
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        index = 0
+        for obj in ShipStore.objects.all().order_by('ship_lvl'):
+            bamboo_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                         item_id__name='Bamboo').aggregate(Sum('count'))
+            banana_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                         item_id__name='Banana').aggregate(Sum('count'))
+            timber_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                         item_id__name='Timber').aggregate(Sum('count'))
+            coconut_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                          item_id__name='Coconut').aggregate(Sum('count'))
+            gold_required = ShipStore.objects.filter(ship_lvl__lte=obj.ship_lvl).aggregate(Sum('buy_cost'))
+
+            self.assertEqual(response.data[index]['bamboo_required'], bamboo_required['count__sum'])
+            self.assertEqual(response.data[index]['banana_required'], banana_required['count__sum'])
+            self.assertEqual(response.data[index]['timber_required'], timber_required['count__sum'])
+            self.assertEqual(response.data[index]['coconut_required'], coconut_required['count__sum'])
+            self.assertEqual(response.data[index]['gold_required'], gold_required['buy_cost__sum'])
+
+            index += 1

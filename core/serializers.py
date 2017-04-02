@@ -421,11 +421,41 @@ class InventorySerializer(serializers.ModelSerializer):
 
 
 class ShipStoreSerializer(serializers.ModelSerializer):
-    items_required = ShipUpgradeDetailSerializer(many=True, read_only=True)
+    bamboo_required = serializers.SerializerMethodField()
+    timber_required = serializers.SerializerMethodField()
+    banana_required = serializers.SerializerMethodField()
+    coconut_required = serializers.SerializerMethodField()
+    gold_required = serializers.SerializerMethodField()
+
+    def get_bamboo_required(self, obj):
+        bamboo_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                     item_id__name='Bamboo').aggregate(Sum('count'))
+        return bamboo_required['count__sum']
+
+    def get_banana_required(self, obj):
+        banana_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                     item_id__name='Banana').aggregate(Sum('count'))
+        return banana_required['count__sum']
+
+    def get_timber_required(self, obj):
+        timber_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                     item_id__name='Timber').aggregate(Sum('count'))
+        return timber_required['count__sum']
+
+    def get_coconut_required(self, obj):
+        coconut_required = ShipUpgrade.objects.filter(ship_store__ship_lvl__lte=obj.ship_lvl,
+                                                      item_id__name='Coconut').aggregate(Sum('count'))
+        return coconut_required['count__sum']
+
+    def get_gold_required(self, obj):
+        gold_required = ShipStore.objects.filter(ship_lvl__lte=obj.ship_lvl).aggregate(Sum('buy_cost'))
+        return gold_required['buy_cost__sum']
 
     class Meta:
         model = ShipStore
-        fields = ('id', 'name', 'cost_multiplier', 'experience_gain', 'image', 'buy_cost', 'items_required')
+        fields = (
+        'id', 'name', 'cost_multiplier', 'experience_gain', 'image', 'bamboo_required', 'timber_required',
+        'banana_required', 'coconut_required', 'gold_required')
 
 
 class VersionSerializer(serializers.ModelSerializer):
