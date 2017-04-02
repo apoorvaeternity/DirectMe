@@ -1,3 +1,5 @@
+import hashlib
+import urllib.parse
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from rest_framework import serializers
@@ -144,6 +146,8 @@ class DocksListSerializer(serializers.ModelSerializer):
     ship_id = serializers.IntegerField(source='ship.id')
     slot_id = serializers.IntegerField(source='slot.id')
     dock_status = serializers.CharField(source='status')
+    gravatar = serializers.SerializerMethodField()
+    next_ship_store_id = serializers.SerializerMethodField()
 
     def get_name(self, obj):
         if Ship.objects.filter(pk=obj.ship_id).exists():
@@ -186,11 +190,28 @@ class DocksListSerializer(serializers.ModelSerializer):
             user_id = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.id
             return user_id
 
+    def get_gravatar(self, obj):
+        if DockChart.objects.filter(ship_id=obj.ship_id, end_time=None).exists():
+            email = DockChart.objects.get(ship_id=obj.ship_id, end_time=None).port.user.email
+            return "https://www.gravatar.com/avatar/%s?%s" % (
+                hashlib.md5(email.lower().encode('utf-8')).hexdigest(),
+                urllib.parse.urlencode({'s': str(40), 'd': 'identicon'})
+            )
+
+    def get_next_ship_store_id(self, obj):
+        if Ship.objects.filter(pk=obj.ship_id).exists():
+            ship = Ship.objects.get(pk=obj.ship_id)
+            ships = ShipStore.objects.filter(buy_cost__gt=ship.ship_store.buy_cost).order_by('buy_cost')
+            next_shipstore = ships.exclude(ship=ship)
+            if next_shipstore==None:
+                return 'This is the last ship'
+            return next_shipstore.first().id
+
     class Meta:
         model = Dock
         fields = (
             'user_id', 'name', 'ship_image', 'island_id', 'park_time', 'port_id', 'username', 'ship_status', 'dock_id',
-            'ship_id', 'slot_id', 'dock_status')
+            'ship_id', 'slot_id', 'dock_status', 'gravatar', 'next_ship_store_id')
 
 
 class SuggestionListSerializer(serializers.Serializer):
@@ -454,8 +475,8 @@ class ShipStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShipStore
         fields = (
-        'id', 'name', 'cost_multiplier', 'experience_gain', 'image', 'bamboo_required', 'timber_required',
-        'banana_required', 'coconut_required', 'gold_required')
+            'id', 'name', 'cost_multiplier', 'experience_gain', 'image', 'bamboo_required', 'timber_required',
+            'banana_required', 'coconut_required', 'gold_required')
 
 
 class VersionSerializer(serializers.ModelSerializer):
