@@ -1,5 +1,23 @@
 [
 {
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$30000$zZ5icAeBHGl8$nm/jQz0jv8uZsgK50ErI5s+tPn5U2guPq0m0L5H3TAM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "pirates",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2017-04-06T08:53:17.293Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
   "model": "core.island",
   "pk": 1,
   "fields": {
@@ -272,6 +290,51 @@
     "name": "Public",
     "penalizable": true,
     "ownable": false
+  }
+},
+{
+  "model": "core.port",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "type": 3,
+    "log": null
+  }
+},
+{
+  "model": "core.port",
+  "pk": 2,
+  "fields": {
+    "user": 1,
+    "type": 3,
+    "log": null
+  }
+},
+{
+  "model": "core.port",
+  "pk": 3,
+  "fields": {
+    "user": 1,
+    "type": 3,
+    "log": null
+  }
+},
+{
+  "model": "core.port",
+  "pk": 4,
+  "fields": {
+    "user": 1,
+    "type": 3,
+    "log": null
+  }
+},
+{
+  "model": "core.port",
+  "pk": 5,
+  "fields": {
+    "user": 1,
+    "type": 3,
+    "log": null
   }
 },
 {

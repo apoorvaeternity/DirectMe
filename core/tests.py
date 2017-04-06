@@ -1,10 +1,11 @@
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.db.models import Sum
+
 from core.models import Dock, ShipStore, Port, PortType, Ship, DockChart, ShipUpgrade
 from player.models import Profile, Inventory, Item
 
@@ -55,7 +56,8 @@ class DockPirateIslandTests(APITestCase):
         Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
-        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
+        pirate_port = Port.objects.filter(user=User.objects.get(username='pirates'),
+                                          type=PortType.objects.get(ownable=False)).first()
         ship = Ship.objects.get(user=user)
         DockChart.objects.create(ship=ship, port=pirate_port)
 
@@ -82,22 +84,29 @@ class DockPirateIslandTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
         response = self.client.post(self.url, data)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0], "Pirate ports doesn\'t exist")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_pirate_port_idle(self):
         """Ensure that atleast one pirate port is idle"""
 
+        pirate_ports = Port.objects.filter(user=User.objects.get(username='pirates'),
+                                           type=PortType.objects.get(ownable=False))
+        user_no = 1
+        for port in pirate_ports:
+            # Occupy all the available pirate ports
+            user = User.objects.create_user(username='some_username' + str(user_no), password='some_password',
+                                            email='some_email' + str(user_no) + '@gmail.com')
+            Profile.objects.create_player(username='some_username' + str(user_no))
+            self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
+            ship = Ship.objects.get(user=user)
+            DockChart.objects.create(ship=ship, port=port)
+            user_no += 1
         user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
-        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
-        ship = Ship.objects.get(user=user)
-        DockChart.objects.create(ship=ship, port=pirate_port)
-
-        ship = Ship.objects.create(user=user, ship_store=ShipStore.objects.first())
+        ship = Ship.objects.filter(user=user).first()
         ship_id = ship.id
 
         data = {'ship_id': ship_id}
@@ -109,14 +118,14 @@ class DockPirateIslandTests(APITestCase):
 
     def test_dock_ship(self):
         """Ensure user can dock ship"""
-        """Ensure that atleast one pirate port is idle"""
 
         user = User.objects.create_user(username='some_username', password='some_password',
                                         email='some_email@gmail.com')
         Profile.objects.create_player(username='some_username')
         self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(user.auth_token.key))
 
-        pirate_port = Port.objects.create(user=user, type=PortType.objects.get(ownable=False))
+        pirate_port = Port.objects.filter(user=User.objects.get(username='pirates'),
+                                          type=PortType.objects.get(ownable=False)).first()
         ship = Ship.objects.get(user=user)
         ship_id = ship.id
 
